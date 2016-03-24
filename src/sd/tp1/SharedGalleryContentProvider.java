@@ -1,17 +1,26 @@
 package sd.tp1;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import sd.clt.ws.IOException_Exception;
 import sd.clt.ws.ServerSOAP;
 import sd.clt.ws.ServerSOAPService;
 import sd.tp1.gui.GalleryContentProvider;
+import sd.tp1.gui.GalleryContentProvider.Album;
 import sd.tp1.gui.Gui;
 
 /*
@@ -21,11 +30,17 @@ import sd.tp1.gui.Gui;
  */
 public class SharedGalleryContentProvider implements GalleryContentProvider{
 
-	Gui gui;	
-	ServerSOAP server;
+	Gui gui;
+	List<ServerSOAP> servers;
+	//ServerSOAP server;
+
+	private int roundRobin;
 
 	SharedGalleryContentProvider() throws IOException {
 		// TODO: code to do when shared gallery starts
+		roundRobin=0;
+		servers = new ArrayList<ServerSOAP>();
+
 		final int port = 9000 ;
 		final InetAddress address = InetAddress.getByName( "224.0.0.0" ) ;
 		if( ! address.isMulticastAddress()) {
@@ -35,7 +50,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 
 		String url="";
 
-		while (true){ //s.setSOTimeout Socket time out exception
+		while (true){
 			byte[] input = ("Album Server").getBytes();
 			DatagramPacket packet = new DatagramPacket( input, input.length );
 			packet.setAddress(address);
@@ -44,18 +59,32 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 
 			byte[] buffer = new byte[65536] ;
 			DatagramPacket url_packet = new DatagramPacket( buffer, buffer.length );
-			socket.receive(url_packet);
-			url = new String (url_packet.getData(), 0, url_packet.getLength());
+			socket.setSoTimeout(3000);
+			while(true){
+				try{
+					socket.receive(url_packet);
+					addServer(url_packet);
+				}catch (SocketTimeoutException e){
+					break;
+				}
+
+			}
+			System.out.println(servers.size());
 			break;
 		}
 		socket.close(); 
 
+
+	}
+
+	private void addServer (DatagramPacket url_packet) {
 		try {
+			String url = new String (url_packet.getData(), 0, url_packet.getLength());
 			URL wsURL = new URL(String.format("%s", url));
 
 			ServerSOAPService service = new ServerSOAPService (wsURL);
-
-			server = service.getServerSOAPPort();
+			servers.add(service.getServerSOAPPort());
+			//server = service.getServerSOAPPort();
 		} catch (Exception e){
 			System.err.println("Erro " + e.getMessage());
 		}
@@ -72,6 +101,12 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		}
 	}
 
+	public ServerSOAP getServer () {
+		if(roundRobin==servers.size())
+			roundRobin=0;
+		return servers.get(roundRobin++);
+	}
+
 	/**
 	 * Returns the list of albums in the system.
 	 * On error this method should return null.
@@ -80,10 +115,22 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public List<Album> getListOfAlbums() { 
 		try{
 			List<Album> lst = new ArrayList<Album>();
-			List <String> aux = server.listAlbums();
+			List <String> aux = new LinkedList<String>();
+
+			Iterator<ServerSOAP> it = servers.iterator();
+			while(it.hasNext()){
+				try{
+					Collection<String> s = it.next().listAlbums();
+					aux.addAll(s);
+				}catch(NullPointerException e){
+				}
+
+			}
 			Iterator<String> i = aux.iterator();
 			while(i.hasNext()){
-				lst.add(new SharedAlbum(i.next()));
+				SharedAlbum album = new SharedAlbum(i.next());
+				if(!albumExists(lst, album))
+					lst.add(album);
 			}
 			return lst;
 		}
@@ -92,6 +139,17 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		}
 	}
 
+	private boolean albumExists (List<Album> lst, SharedAlbum album){
+		
+		Iterator<Album> t = lst.iterator();
+		while(t.hasNext()){
+			if(album.getName().equals(t.next().getName()))
+				return true;
+		}
+		return false;
+		
+	}
+	
 	/**
 	 * Returns the list of pictures for the given album. 
 	 * On error this method should return null.
@@ -100,7 +158,17 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public List<Picture> getListOfPictures(Album album) {
 		try{
 			List<Picture> lst = new ArrayList<Picture>();
-			List <String> aux = server.listPictures(album.getName());
+			List <String> aux = new LinkedList<String>();
+
+			Iterator<ServerSOAP> it = servers.iterator();
+			while(it.hasNext()){
+				try{
+					Collection<String> s = it.next().listPictures(album.getName());
+					aux.addAll(s);
+				}
+				catch(NullPointerException e){
+				}
+			}
 			Iterator<String> i = aux.iterator();
 			while(i.hasNext()){
 				lst.add(new SharedPicture(i.next()));
@@ -119,11 +187,18 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	@Override
 	public byte[] getPictureData(Album album, Picture picture){
 		// TODO: obtain remote information
-		try{
-			return server.getPictureData(album.getName(), picture.getName());
-		}catch (Exception e) {
-			return null;
+		Iterator<ServerSOAP> it = servers.iterator();
+		while(it.hasNext()){
+			try{
+				byte [] pictureData = it.next().getPictureData(album.getName(), picture.getName());
+				if(pictureData.length>0)
+					return pictureData; 
+			}catch(NullPointerException e){
+			}
+			catch (IOException_Exception e) {
+			}
 		}
+		return null;
 	}
 
 	/**
@@ -133,7 +208,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	@Override
 	public Album createAlbum(String name) {
 		// TODO: contact servers to create album
-		if(!server.createAlbum(name)){
+		if(!getServer().createAlbum(name)){
 			return null;
 		}
 		return new SharedAlbum(name);
@@ -146,7 +221,9 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public void deleteAlbum(Album album) {
 		// TODO: contact servers to delete album 
 		try {
-			server.deleteAlbum(album.getName());
+			Iterator<ServerSOAP> i = servers.iterator();
+			while(i.hasNext())
+				i.next().deleteAlbum(album.getName());
 		}catch (Exception e){
 		}
 	}
@@ -158,7 +235,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	@Override
 	public Picture uploadPicture(Album album, String name, byte[] data) {
 		// TODO: contact servers to add picture name with contents data
-		if(server.uploadPicture(album.getName(), name, data)){
+		if(getServer().uploadPicture(album.getName(), name, data)){
 			return new SharedPicture(name);
 		}
 		return null;
@@ -173,7 +250,9 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public boolean deletePicture(Album album, Picture picture) {
 		// TODO: contact servers to delete picture from album
 		try{
-			server.deletePicture(album.getName(), picture.getName());
+			Iterator<ServerSOAP> i = servers.iterator();
+			while(i.hasNext())
+				i.next().deletePicture(album.getName(), picture.getName());
 			return true;
 		}catch (Exception e) {
 			return false;

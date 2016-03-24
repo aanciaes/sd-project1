@@ -16,7 +16,7 @@ import javax.xml.ws.Endpoint;
 @WebService
 public class ServerSOAP {
 
-	private static final String DEFAULT_ALBUM_FILESYSTEM = "/home/miguel/AlbumFileSystem";
+	private static final String DEFAULT_ALBUM_FILESYSTEM = "/home/miguel/AlbumFileSystem2";
 	private File basePath;
 
 	public ServerSOAP () {
@@ -26,6 +26,7 @@ public class ServerSOAP {
 	public ServerSOAP (String pathname) {
 		super();
 		basePath = new File(pathname);
+		System.out.println(basePath.toString());
 	}
 
 	@WebMethod
@@ -34,7 +35,8 @@ public class ServerSOAP {
 		if(basePath.exists() && basePath.isDirectory()){
 			return basePath.list();		//TODO: return only directories				
 		}else {
-			throw new FileNotFoundException ("File not found :" + basePath);
+			//throw new FileNotFoundException ("File not found :" + basePath);
+			return null;
 		}
 	}
 
@@ -46,7 +48,7 @@ public class ServerSOAP {
 		if(f.exists() && f.isDirectory()){
 			return f.list();		//TODO: return only files				
 		}else {
-			throw new FileNotFoundException ("File not found :" + basePath);
+			return null;
 		}
 	}
 
@@ -60,7 +62,8 @@ public class ServerSOAP {
 		if(f.exists())
 			return Files.readAllBytes(f.toPath());
 		else
-			throw new FileNotFoundException();
+			return null;
+			//throw new FileNotFoundException();
 	}
 
 	@WebMethod
@@ -111,7 +114,7 @@ public class ServerSOAP {
 
 	public static void main (String [] args) throws IOException {
 		//publish endpoint server
-		Endpoint.publish("http://localhost:8080/FileServer", new ServerSOAP());
+		Endpoint.publish("http://localhost:8081/FileServer", new ServerSOAP());
 		System.err.println("FileServer started");
 
 		//Creating Multicast Socket
@@ -141,12 +144,11 @@ public class ServerSOAP {
 	 */
 	public static void processMessage (DatagramPacket packet, MulticastSocket socket) throws IOException {	
 		if(new String (packet.getData(), 0, packet.getLength()).equals("Album Server")){
-			byte[] input = new String ("http://localhost:8080/FileServer").getBytes();
+			byte[] input = new String ("http://localhost:8081/FileServer").getBytes();
 			DatagramPacket reply = new DatagramPacket( input, input.length );
 			reply.setAddress(packet.getAddress());
 			reply.setPort(packet.getPort());
 			socket.send(reply);
 		}
 	}
-
 }
