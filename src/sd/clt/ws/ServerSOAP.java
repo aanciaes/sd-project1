@@ -120,6 +120,27 @@ public interface ServerSOAP {
 
     /**
      * 
+     * @param arg2
+     * @param arg1
+     * @param arg0
+     * @return
+     *     returns boolean
+     */
+    @WebMethod
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "uploadPicture", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.UploadPicture")
+    @ResponseWrapper(localName = "uploadPictureResponse", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.UploadPictureResponse")
+    @Action(input = "http://srv.sd/ServerSOAP/uploadPictureRequest", output = "http://srv.sd/ServerSOAP/uploadPictureResponse")
+    public boolean uploadPicture(
+        @WebParam(name = "arg0", targetNamespace = "")
+        String arg0,
+        @WebParam(name = "arg1", targetNamespace = "")
+        String arg1,
+        @WebParam(name = "arg2", targetNamespace = "")
+        byte[] arg2);
+
+    /**
+     * 
      * @param arg1
      * @param arg0
      * @throws IOException_Exception

@@ -164,8 +164,12 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public Picture uploadPicture(Album album, String name, byte[] data) {
-		// TODO: contact servers to add picture name with contents data 
-		return new SharedPicture(name);
+		// TODO: contact servers to add picture name with contents data
+		if(server.uploadPicture(album.getName(), name, data)){
+			return new SharedPicture(name);
+		}
+		return null;
+
 	}
 
 	/**
@@ -176,8 +180,8 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public boolean deletePicture(Album album, Picture picture) {
 		// TODO: contact servers to delete picture from album
 		try{
-			 server.deletePicture(album.getName(), picture.getName());
-			 return true;
+			server.deletePicture(album.getName(), picture.getName());
+			return true;
 		}catch (Exception e) {
 			return false;
 		}

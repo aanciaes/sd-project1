@@ -2,6 +2,7 @@ package sd.srv;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -13,7 +14,6 @@ import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
 
 import sd.tp1.gui.GalleryContentProvider.Album;
-import sd.tp1.gui.GalleryContentProvider.Picture;
 
 @WebService
 public class ServerSOAP {
@@ -83,6 +83,22 @@ public class ServerSOAP {
 
 		File f = new File(basePath, album);
 		Files.delete(f.toPath());
+	}
+
+	@WebMethod
+	public boolean uploadPicture(String album, String name, byte[] data) {
+		// TODO: contact servers to add picture name with contents data 
+		try{
+			String aux = String.format("%s/%s", album, name);
+			File f = new File(basePath, aux);
+			
+			FileOutputStream fos = new FileOutputStream(f.getAbsolutePath());
+			fos.write(data);
+			fos.close();
+			return true;
+		}catch (Exception e) {
+			return false;
+		}
 	}
 
 	@WebMethod

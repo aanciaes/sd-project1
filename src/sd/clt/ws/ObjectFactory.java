@@ -24,6 +24,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
+    private final static QName _GetPictureDataResponseReturn_QNAME = new QName("", "return");
     private final static QName _ListPicturesResponse_QNAME = new QName("http://srv.sd/", "listPicturesResponse");
     private final static QName _CreateAlbumResponse_QNAME = new QName("http://srv.sd/", "createAlbumResponse");
     private final static QName _GetPictureDataResponse_QNAME = new QName("http://srv.sd/", "getPictureDataResponse");
@@ -33,12 +34,14 @@ public class ObjectFactory {
     private final static QName _GetPictureData_QNAME = new QName("http://srv.sd/", "getPictureData");
     private final static QName _IOException_QNAME = new QName("http://srv.sd/", "IOException");
     private final static QName _ListAlbums_QNAME = new QName("http://srv.sd/", "listAlbums");
+    private final static QName _UploadPicture_QNAME = new QName("http://srv.sd/", "uploadPicture");
     private final static QName _FileNotFoundException_QNAME = new QName("http://srv.sd/", "FileNotFoundException");
+    private final static QName _UploadPictureResponse_QNAME = new QName("http://srv.sd/", "uploadPictureResponse");
     private final static QName _DeletePicture_QNAME = new QName("http://srv.sd/", "deletePicture");
     private final static QName _DeleteAlbumResponse_QNAME = new QName("http://srv.sd/", "deleteAlbumResponse");
     private final static QName _ListAlbumsResponse_QNAME = new QName("http://srv.sd/", "listAlbumsResponse");
     private final static QName _DeleteAlbum_QNAME = new QName("http://srv.sd/", "deleteAlbum");
-    private final static QName _GetPictureDataResponseReturn_QNAME = new QName("", "return");
+    private final static QName _UploadPictureArg2_QNAME = new QName("", "arg2");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: sd.clt.ws
@@ -136,6 +139,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link UploadPicture }
+     * 
+     */
+    public UploadPicture createUploadPicture() {
+        return new UploadPicture();
+    }
+
+    /**
      * Create an instance of {@link ListAlbums }
      * 
      */
@@ -157,6 +168,23 @@ public class ObjectFactory {
      */
     public DeletePicture createDeletePicture() {
         return new DeletePicture();
+    }
+
+    /**
+     * Create an instance of {@link UploadPictureResponse }
+     * 
+     */
+    public UploadPictureResponse createUploadPictureResponse() {
+        return new UploadPictureResponse();
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link byte[]}{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "", name = "return", scope = GetPictureDataResponse.class)
+    public JAXBElement<byte[]> createGetPictureDataResponseReturn(byte[] value) {
+        return new JAXBElement<byte[]>(_GetPictureDataResponseReturn_QNAME, byte[].class, GetPictureDataResponse.class, ((byte[]) value));
     }
 
     /**
@@ -241,12 +269,30 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link UploadPicture }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://srv.sd/", name = "uploadPicture")
+    public JAXBElement<UploadPicture> createUploadPicture(UploadPicture value) {
+        return new JAXBElement<UploadPicture>(_UploadPicture_QNAME, UploadPicture.class, null, value);
+    }
+
+    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link FileNotFoundException }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://srv.sd/", name = "FileNotFoundException")
     public JAXBElement<FileNotFoundException> createFileNotFoundException(FileNotFoundException value) {
         return new JAXBElement<FileNotFoundException>(_FileNotFoundException_QNAME, FileNotFoundException.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link UploadPictureResponse }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://srv.sd/", name = "uploadPictureResponse")
+    public JAXBElement<UploadPictureResponse> createUploadPictureResponse(UploadPictureResponse value) {
+        return new JAXBElement<UploadPictureResponse>(_UploadPictureResponse_QNAME, UploadPictureResponse.class, null, value);
     }
 
     /**
@@ -289,9 +335,9 @@ public class ObjectFactory {
      * Create an instance of {@link JAXBElement }{@code <}{@link byte[]}{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "", name = "return", scope = GetPictureDataResponse.class)
-    public JAXBElement<byte[]> createGetPictureDataResponseReturn(byte[] value) {
-        return new JAXBElement<byte[]>(_GetPictureDataResponseReturn_QNAME, byte[].class, GetPictureDataResponse.class, ((byte[]) value));
+    @XmlElementDecl(namespace = "", name = "arg2", scope = UploadPicture.class)
+    public JAXBElement<byte[]> createUploadPictureArg2(byte[] value) {
+        return new JAXBElement<byte[]>(_UploadPictureArg2_QNAME, byte[].class, UploadPicture.class, ((byte[]) value));
     }
 
 }
