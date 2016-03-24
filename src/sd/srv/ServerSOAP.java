@@ -86,7 +86,7 @@ public class ServerSOAP {
 	@WebMethod
 	public boolean uploadPicture(String album, String name, byte[] data) {
 		// TODO: contact servers to add picture name with contents data 
-		System.out.println(String.format("Creating new picture %s in %s album %s", name, album));
+		System.out.println(String.format("Creating new picture %s in %s album", name, album));
 		try{
 			String aux = String.format("%s/%s", album, name);
 			File f = new File(basePath, aux);

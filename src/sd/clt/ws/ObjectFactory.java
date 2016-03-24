@@ -24,7 +24,6 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _GetPictureDataResponseReturn_QNAME = new QName("", "return");
     private final static QName _ListPicturesResponse_QNAME = new QName("http://srv.sd/", "listPicturesResponse");
     private final static QName _CreateAlbumResponse_QNAME = new QName("http://srv.sd/", "createAlbumResponse");
     private final static QName _GetPictureDataResponse_QNAME = new QName("http://srv.sd/", "getPictureDataResponse");
@@ -41,6 +40,7 @@ public class ObjectFactory {
     private final static QName _DeleteAlbumResponse_QNAME = new QName("http://srv.sd/", "deleteAlbumResponse");
     private final static QName _ListAlbumsResponse_QNAME = new QName("http://srv.sd/", "listAlbumsResponse");
     private final static QName _DeleteAlbum_QNAME = new QName("http://srv.sd/", "deleteAlbum");
+    private final static QName _GetPictureDataResponseReturn_QNAME = new QName("", "return");
     private final static QName _UploadPictureArg2_QNAME = new QName("", "arg2");
 
     /**
@@ -176,15 +176,6 @@ public class ObjectFactory {
      */
     public UploadPictureResponse createUploadPictureResponse() {
         return new UploadPictureResponse();
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link byte[]}{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "", name = "return", scope = GetPictureDataResponse.class)
-    public JAXBElement<byte[]> createGetPictureDataResponseReturn(byte[] value) {
-        return new JAXBElement<byte[]>(_GetPictureDataResponseReturn_QNAME, byte[].class, GetPictureDataResponse.class, ((byte[]) value));
     }
 
     /**
@@ -329,6 +320,15 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://srv.sd/", name = "deleteAlbum")
     public JAXBElement<DeleteAlbum> createDeleteAlbum(DeleteAlbum value) {
         return new JAXBElement<DeleteAlbum>(_DeleteAlbum_QNAME, DeleteAlbum.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link byte[]}{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "", name = "return", scope = GetPictureDataResponse.class)
+    public JAXBElement<byte[]> createGetPictureDataResponseReturn(byte[] value) {
+        return new JAXBElement<byte[]>(_GetPictureDataResponseReturn_QNAME, byte[].class, GetPictureDataResponse.class, ((byte[]) value));
     }
 
     /**
