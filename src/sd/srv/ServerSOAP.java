@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
@@ -83,7 +85,14 @@ public class ServerSOAP {
 		System.out.println(String.format("Deleting album %s", album));
 
 		File f = new File(basePath, album);
-		Files.delete(f.toPath());
+		try{
+			Files.delete(f.toPath());
+		}catch(NoSuchFileException e){
+			//e.printStackTrace();
+		}catch(DirectoryNotEmptyException e){
+			System.out.println("Directory is not empty. Album not deleted!");
+			//e.printStackTrace();
+		}
 	}
 
 	@WebMethod
@@ -91,8 +100,13 @@ public class ServerSOAP {
 		// TODO: contact servers to add picture name with contents data 
 		System.out.println(String.format("Creating new picture %s in %s album", name, album));
 		try{
-			String aux = String.format("%s/%s", album, name);
+			String aux = String.format("%s", album);
 			File f = new File(basePath, aux);
+			if(!f.exists())
+				createAlbum(album);
+			
+			aux = String.format("%s/%s", album, name);
+			f = new File(basePath, aux);
 			
 			FileOutputStream fos = new FileOutputStream(f.getAbsolutePath());
 			fos.write(data);
@@ -109,7 +123,11 @@ public class ServerSOAP {
 
 		String aux = String.format("%s/%s", album, picture);
 		File f = new File(basePath, aux);
-		Files.delete(f.toPath());
+		try{
+			Files.delete(f.toPath());
+		}catch(NoSuchFileException e){
+			//e.printStackTrace();
+		}
 	}
 
 	public static void main (String [] args) throws IOException {

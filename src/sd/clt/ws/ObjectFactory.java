@@ -40,8 +40,8 @@ public class ObjectFactory {
     private final static QName _DeleteAlbumResponse_QNAME = new QName("http://srv.sd/", "deleteAlbumResponse");
     private final static QName _ListAlbumsResponse_QNAME = new QName("http://srv.sd/", "listAlbumsResponse");
     private final static QName _DeleteAlbum_QNAME = new QName("http://srv.sd/", "deleteAlbum");
-    private final static QName _GetPictureDataResponseReturn_QNAME = new QName("", "return");
     private final static QName _UploadPictureArg2_QNAME = new QName("", "arg2");
+    private final static QName _GetPictureDataResponseReturn_QNAME = new QName("", "return");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: sd.clt.ws
@@ -326,18 +326,18 @@ public class ObjectFactory {
      * Create an instance of {@link JAXBElement }{@code <}{@link byte[]}{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "", name = "return", scope = GetPictureDataResponse.class)
-    public JAXBElement<byte[]> createGetPictureDataResponseReturn(byte[] value) {
-        return new JAXBElement<byte[]>(_GetPictureDataResponseReturn_QNAME, byte[].class, GetPictureDataResponse.class, ((byte[]) value));
+    @XmlElementDecl(namespace = "", name = "arg2", scope = UploadPicture.class)
+    public JAXBElement<byte[]> createUploadPictureArg2(byte[] value) {
+        return new JAXBElement<byte[]>(_UploadPictureArg2_QNAME, byte[].class, UploadPicture.class, ((byte[]) value));
     }
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link byte[]}{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "", name = "arg2", scope = UploadPicture.class)
-    public JAXBElement<byte[]> createUploadPictureArg2(byte[] value) {
-        return new JAXBElement<byte[]>(_UploadPictureArg2_QNAME, byte[].class, UploadPicture.class, ((byte[]) value));
+    @XmlElementDecl(namespace = "", name = "return", scope = GetPictureDataResponse.class)
+    public JAXBElement<byte[]> createGetPictureDataResponseReturn(byte[] value) {
+        return new JAXBElement<byte[]>(_GetPictureDataResponseReturn_QNAME, byte[].class, GetPictureDataResponse.class, ((byte[]) value));
     }
 
 }
