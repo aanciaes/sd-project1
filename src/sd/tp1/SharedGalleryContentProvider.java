@@ -174,8 +174,13 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public boolean deletePicture(Album album, Picture picture) {
-		// TODO: contact servers to delete picture from album 
-		return true;
+		// TODO: contact servers to delete picture from album
+		try{
+			 server.deletePicture(album.getName(), picture.getName());
+			 return true;
+		}catch (Exception e) {
+			return false;
+		}
 	}
 
 

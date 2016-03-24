@@ -118,4 +118,24 @@ public interface ServerSOAP {
         throws IOException_Exception
     ;
 
+    /**
+     * 
+     * @param arg1
+     * @param arg0
+     * @throws IOException_Exception
+     */
+    @WebMethod
+    @RequestWrapper(localName = "deletePicture", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.DeletePicture")
+    @ResponseWrapper(localName = "deletePictureResponse", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.DeletePictureResponse")
+    @Action(input = "http://srv.sd/ServerSOAP/deletePictureRequest", output = "http://srv.sd/ServerSOAP/deletePictureResponse", fault = {
+        @FaultAction(className = IOException_Exception.class, value = "http://srv.sd/ServerSOAP/deletePicture/Fault/IOException")
+    })
+    public void deletePicture(
+        @WebParam(name = "arg0", targetNamespace = "")
+        String arg0,
+        @WebParam(name = "arg1", targetNamespace = "")
+        String arg1)
+        throws IOException_Exception
+    ;
+
 }

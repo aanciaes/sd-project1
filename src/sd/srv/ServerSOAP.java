@@ -13,17 +13,18 @@ import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
 
 import sd.tp1.gui.GalleryContentProvider.Album;
+import sd.tp1.gui.GalleryContentProvider.Picture;
 
 @WebService
 public class ServerSOAP {
 
 	private static final String DEFAULT_ALBUM_FILESYSTEM = "/home/miguel/AlbumFileSystem";
 	private File basePath;
-	
+
 	public ServerSOAP () {
 		this(DEFAULT_ALBUM_FILESYSTEM);
 	}
-	
+
 	public ServerSOAP (String pathname) {
 		super();
 		basePath = new File(pathname);
@@ -38,11 +39,11 @@ public class ServerSOAP {
 			throw new FileNotFoundException ("File not found :" + basePath);
 		}
 	}
-	
+
 	@WebMethod
 	public String [] listPictures (String album) throws FileNotFoundException {
 		System.out.println(String.format("Listing all pictures of %s album", album));
-		
+
 		File f = new File (basePath, album);
 		if(f.exists() && f.isDirectory()){
 			return f.list();		//TODO: return only files				
@@ -50,37 +51,46 @@ public class ServerSOAP {
 			throw new FileNotFoundException ("File not found :" + basePath);
 		}
 	}
-	
+
 	@WebMethod
 	public byte[] getPictureData(String album, String picture) throws IOException{
 		System.out.println(String.format("Acessing image %s of %s album", picture, album));
-		
+
 		String aux = String.format("%s/%s", album, picture);
 		File f = new File(basePath, aux);
-		
+
 		if(f.exists())
 			return Files.readAllBytes(f.toPath());
 		else
 			throw new FileNotFoundException();
 	}
-	
+
 	@WebMethod
 	public boolean createAlbum(String name) {
 		System.out.println(String.format("Creating new album named %s", name));
-		
+
 		File f = new File(basePath, name);
-		
+
 		if(!f.exists())
 			return f.mkdir();
 		else 
 			return false;
 	}
-	
+
 	@WebMethod
 	public void deleteAlbum(String album) throws IOException {
 		System.out.println(String.format("Deleting album %s", album));
-		
+
 		File f = new File(basePath, album);
+		Files.delete(f.toPath());
+	}
+
+	@WebMethod
+	public void deletePicture(String album, String picture) throws IOException {
+		System.out.println(String.format("Deleting Picture %s of %s album", picture, album));
+
+		String aux = String.format("%s/%s", album, picture);
+		File f = new File(basePath, aux);
 		Files.delete(f.toPath());
 	}
 
@@ -88,17 +98,17 @@ public class ServerSOAP {
 		//publish endpoint server
 		Endpoint.publish("http://localhost:8080/FileServer", new ServerSOAP());
 		System.err.println("FileServer started");
-		
+
 		//Creating Multicast Socket
 		final InetAddress address = InetAddress.getByName("224.0.0.0");
 		if(!address.isMulticastAddress()) {
 			System.out.println( "Use range : 224.0.0.0 -- 239.255.255.255");
 			System.exit(1);
 		}
-		
+
 		MulticastSocket socket = new MulticastSocket(9000);
 		socket.joinGroup(address);
-		
+
 		//Waiting for a client request
 		while(true) {
 			byte[] buffer = new byte[65536];
@@ -107,7 +117,7 @@ public class ServerSOAP {
 			processMessage (packet, socket);
 		}
 	}
-	
+
 	/**
 	 * Processing client request
 	 * @param packet Packet containing the request

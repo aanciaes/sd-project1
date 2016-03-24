@@ -24,17 +24,19 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _ListAlbums_QNAME = new QName("http://srv.sd/", "listAlbums");
-    private final static QName _FileNotFoundException_QNAME = new QName("http://srv.sd/", "FileNotFoundException");
     private final static QName _ListPicturesResponse_QNAME = new QName("http://srv.sd/", "listPicturesResponse");
     private final static QName _CreateAlbumResponse_QNAME = new QName("http://srv.sd/", "createAlbumResponse");
-    private final static QName _DeleteAlbumResponse_QNAME = new QName("http://srv.sd/", "deleteAlbumResponse");
     private final static QName _GetPictureDataResponse_QNAME = new QName("http://srv.sd/", "getPictureDataResponse");
     private final static QName _CreateAlbum_QNAME = new QName("http://srv.sd/", "createAlbum");
-    private final static QName _ListAlbumsResponse_QNAME = new QName("http://srv.sd/", "listAlbumsResponse");
     private final static QName _ListPictures_QNAME = new QName("http://srv.sd/", "listPictures");
+    private final static QName _DeletePictureResponse_QNAME = new QName("http://srv.sd/", "deletePictureResponse");
     private final static QName _GetPictureData_QNAME = new QName("http://srv.sd/", "getPictureData");
     private final static QName _IOException_QNAME = new QName("http://srv.sd/", "IOException");
+    private final static QName _ListAlbums_QNAME = new QName("http://srv.sd/", "listAlbums");
+    private final static QName _FileNotFoundException_QNAME = new QName("http://srv.sd/", "FileNotFoundException");
+    private final static QName _DeletePicture_QNAME = new QName("http://srv.sd/", "deletePicture");
+    private final static QName _DeleteAlbumResponse_QNAME = new QName("http://srv.sd/", "deleteAlbumResponse");
+    private final static QName _ListAlbumsResponse_QNAME = new QName("http://srv.sd/", "listAlbumsResponse");
     private final static QName _DeleteAlbum_QNAME = new QName("http://srv.sd/", "deleteAlbum");
     private final static QName _GetPictureDataResponseReturn_QNAME = new QName("", "return");
 
@@ -46,27 +48,19 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link DeletePictureResponse }
+     * 
+     */
+    public DeletePictureResponse createDeletePictureResponse() {
+        return new DeletePictureResponse();
+    }
+
+    /**
      * Create an instance of {@link ListPictures }
      * 
      */
     public ListPictures createListPictures() {
         return new ListPictures();
-    }
-
-    /**
-     * Create an instance of {@link ListAlbumsResponse }
-     * 
-     */
-    public ListAlbumsResponse createListAlbumsResponse() {
-        return new ListAlbumsResponse();
-    }
-
-    /**
-     * Create an instance of {@link DeleteAlbum }
-     * 
-     */
-    public DeleteAlbum createDeleteAlbum() {
-        return new DeleteAlbum();
     }
 
     /**
@@ -94,6 +88,46 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link CreateAlbum }
+     * 
+     */
+    public CreateAlbum createCreateAlbum() {
+        return new CreateAlbum();
+    }
+
+    /**
+     * Create an instance of {@link CreateAlbumResponse }
+     * 
+     */
+    public CreateAlbumResponse createCreateAlbumResponse() {
+        return new CreateAlbumResponse();
+    }
+
+    /**
+     * Create an instance of {@link GetPictureDataResponse }
+     * 
+     */
+    public GetPictureDataResponse createGetPictureDataResponse() {
+        return new GetPictureDataResponse();
+    }
+
+    /**
+     * Create an instance of {@link ListAlbumsResponse }
+     * 
+     */
+    public ListAlbumsResponse createListAlbumsResponse() {
+        return new ListAlbumsResponse();
+    }
+
+    /**
+     * Create an instance of {@link DeleteAlbum }
+     * 
+     */
+    public DeleteAlbum createDeleteAlbum() {
+        return new DeleteAlbum();
+    }
+
+    /**
      * Create an instance of {@link FileNotFoundException }
      * 
      */
@@ -110,22 +144,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link CreateAlbum }
-     * 
-     */
-    public CreateAlbum createCreateAlbum() {
-        return new CreateAlbum();
-    }
-
-    /**
-     * Create an instance of {@link GetPictureDataResponse }
-     * 
-     */
-    public GetPictureDataResponse createGetPictureDataResponse() {
-        return new GetPictureDataResponse();
-    }
-
-    /**
      * Create an instance of {@link DeleteAlbumResponse }
      * 
      */
@@ -134,29 +152,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link CreateAlbumResponse }
+     * Create an instance of {@link DeletePicture }
      * 
      */
-    public CreateAlbumResponse createCreateAlbumResponse() {
-        return new CreateAlbumResponse();
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link ListAlbums }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://srv.sd/", name = "listAlbums")
-    public JAXBElement<ListAlbums> createListAlbums(ListAlbums value) {
-        return new JAXBElement<ListAlbums>(_ListAlbums_QNAME, ListAlbums.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link FileNotFoundException }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://srv.sd/", name = "FileNotFoundException")
-    public JAXBElement<FileNotFoundException> createFileNotFoundException(FileNotFoundException value) {
-        return new JAXBElement<FileNotFoundException>(_FileNotFoundException_QNAME, FileNotFoundException.class, null, value);
+    public DeletePicture createDeletePicture() {
+        return new DeletePicture();
     }
 
     /**
@@ -178,15 +178,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link DeleteAlbumResponse }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://srv.sd/", name = "deleteAlbumResponse")
-    public JAXBElement<DeleteAlbumResponse> createDeleteAlbumResponse(DeleteAlbumResponse value) {
-        return new JAXBElement<DeleteAlbumResponse>(_DeleteAlbumResponse_QNAME, DeleteAlbumResponse.class, null, value);
-    }
-
-    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link GetPictureDataResponse }{@code >}}
      * 
      */
@@ -205,21 +196,21 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link ListAlbumsResponse }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://srv.sd/", name = "listAlbumsResponse")
-    public JAXBElement<ListAlbumsResponse> createListAlbumsResponse(ListAlbumsResponse value) {
-        return new JAXBElement<ListAlbumsResponse>(_ListAlbumsResponse_QNAME, ListAlbumsResponse.class, null, value);
-    }
-
-    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link ListPictures }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://srv.sd/", name = "listPictures")
     public JAXBElement<ListPictures> createListPictures(ListPictures value) {
         return new JAXBElement<ListPictures>(_ListPictures_QNAME, ListPictures.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link DeletePictureResponse }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://srv.sd/", name = "deletePictureResponse")
+    public JAXBElement<DeletePictureResponse> createDeletePictureResponse(DeletePictureResponse value) {
+        return new JAXBElement<DeletePictureResponse>(_DeletePictureResponse_QNAME, DeletePictureResponse.class, null, value);
     }
 
     /**
@@ -238,6 +229,51 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://srv.sd/", name = "IOException")
     public JAXBElement<IOException> createIOException(IOException value) {
         return new JAXBElement<IOException>(_IOException_QNAME, IOException.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link ListAlbums }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://srv.sd/", name = "listAlbums")
+    public JAXBElement<ListAlbums> createListAlbums(ListAlbums value) {
+        return new JAXBElement<ListAlbums>(_ListAlbums_QNAME, ListAlbums.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link FileNotFoundException }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://srv.sd/", name = "FileNotFoundException")
+    public JAXBElement<FileNotFoundException> createFileNotFoundException(FileNotFoundException value) {
+        return new JAXBElement<FileNotFoundException>(_FileNotFoundException_QNAME, FileNotFoundException.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link DeletePicture }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://srv.sd/", name = "deletePicture")
+    public JAXBElement<DeletePicture> createDeletePicture(DeletePicture value) {
+        return new JAXBElement<DeletePicture>(_DeletePicture_QNAME, DeletePicture.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link DeleteAlbumResponse }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://srv.sd/", name = "deleteAlbumResponse")
+    public JAXBElement<DeleteAlbumResponse> createDeleteAlbumResponse(DeleteAlbumResponse value) {
+        return new JAXBElement<DeleteAlbumResponse>(_DeleteAlbumResponse_QNAME, DeleteAlbumResponse.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link ListAlbumsResponse }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://srv.sd/", name = "listAlbumsResponse")
+    public JAXBElement<ListAlbumsResponse> createListAlbumsResponse(ListAlbumsResponse value) {
+        return new JAXBElement<ListAlbumsResponse>(_ListAlbumsResponse_QNAME, ListAlbumsResponse.class, null, value);
     }
 
     /**
