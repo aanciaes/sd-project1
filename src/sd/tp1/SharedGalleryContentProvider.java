@@ -1,21 +1,14 @@
 package sd.tp1;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import sd.clt.ws.FileNotFoundException_Exception;
-import sd.clt.ws.IOException_Exception;
 import sd.clt.ws.ServerSOAP;
 import sd.clt.ws.ServerSOAPService;
 import sd.tp1.gui.GalleryContentProvider;
