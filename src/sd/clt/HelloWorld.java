@@ -19,9 +19,7 @@ public class HelloWorld {
 			System.out.println("Use java HelloWorld");
 			System.exit(0);
 		}
-		
-		//Git test
-		
+				
 		final int port = 9000 ;
 		final InetAddress address = InetAddress.getByName( "224.0.0.0" ) ;
 		if( ! address.isMulticastAddress()) {
