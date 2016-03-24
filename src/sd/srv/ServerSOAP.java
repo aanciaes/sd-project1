@@ -6,10 +6,13 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.nio.file.Files;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
+
+import sd.tp1.gui.GalleryContentProvider.Album;
 
 @WebService
 public class ServerSOAP {
@@ -46,6 +49,39 @@ public class ServerSOAP {
 		}else {
 			throw new FileNotFoundException ("File not found :" + basePath);
 		}
+	}
+	
+	@WebMethod
+	public byte[] getPictureData(String album, String picture) throws IOException{
+		System.out.println(String.format("Acessing image %s of %s album", picture, album));
+		
+		String aux = String.format("%s/%s", album, picture);
+		File f = new File(basePath, aux);
+		
+		if(f.exists())
+			return Files.readAllBytes(f.toPath());
+		else
+			throw new FileNotFoundException();
+	}
+	
+	@WebMethod
+	public boolean createAlbum(String name) {
+		System.out.println(String.format("Creating new album named %s", name));
+		
+		File f = new File(basePath, name);
+		
+		if(!f.exists())
+			return f.mkdir();
+		else 
+			return false;
+	}
+	
+	@WebMethod
+	public void deleteAlbum(String album) throws IOException {
+		System.out.println(String.format("Deleting album %s", album));
+		
+		File f = new File(basePath, album);
+		Files.delete(f.toPath());
 	}
 
 	public static void main (String [] args) throws IOException {

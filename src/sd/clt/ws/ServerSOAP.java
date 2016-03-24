@@ -63,4 +63,59 @@ public interface ServerSOAP {
         throws FileNotFoundException_Exception
     ;
 
+    /**
+     * 
+     * @param arg1
+     * @param arg0
+     * @return
+     *     returns byte[]
+     * @throws IOException_Exception
+     */
+    @WebMethod
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "getPictureData", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.GetPictureData")
+    @ResponseWrapper(localName = "getPictureDataResponse", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.GetPictureDataResponse")
+    @Action(input = "http://srv.sd/ServerSOAP/getPictureDataRequest", output = "http://srv.sd/ServerSOAP/getPictureDataResponse", fault = {
+        @FaultAction(className = IOException_Exception.class, value = "http://srv.sd/ServerSOAP/getPictureData/Fault/IOException")
+    })
+    public byte[] getPictureData(
+        @WebParam(name = "arg0", targetNamespace = "")
+        String arg0,
+        @WebParam(name = "arg1", targetNamespace = "")
+        String arg1)
+        throws IOException_Exception
+    ;
+
+    /**
+     * 
+     * @param arg0
+     * @return
+     *     returns boolean
+     */
+    @WebMethod
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "createAlbum", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.CreateAlbum")
+    @ResponseWrapper(localName = "createAlbumResponse", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.CreateAlbumResponse")
+    @Action(input = "http://srv.sd/ServerSOAP/createAlbumRequest", output = "http://srv.sd/ServerSOAP/createAlbumResponse")
+    public boolean createAlbum(
+        @WebParam(name = "arg0", targetNamespace = "")
+        String arg0);
+
+    /**
+     * 
+     * @param arg0
+     * @throws IOException_Exception
+     */
+    @WebMethod
+    @RequestWrapper(localName = "deleteAlbum", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.DeleteAlbum")
+    @ResponseWrapper(localName = "deleteAlbumResponse", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.DeleteAlbumResponse")
+    @Action(input = "http://srv.sd/ServerSOAP/deleteAlbumRequest", output = "http://srv.sd/ServerSOAP/deleteAlbumResponse", fault = {
+        @FaultAction(className = IOException_Exception.class, value = "http://srv.sd/ServerSOAP/deleteAlbum/Fault/IOException")
+    })
+    public void deleteAlbum(
+        @WebParam(name = "arg0", targetNamespace = "")
+        String arg0)
+        throws IOException_Exception
+    ;
+
 }

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import sd.clt.ws.FileNotFoundException_Exception;
+import sd.clt.ws.IOException_Exception;
 import sd.clt.ws.ServerSOAP;
 import sd.clt.ws.ServerSOAPService;
 import sd.tp1.gui.GalleryContentProvider;
@@ -123,9 +124,13 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 * On error this method should return null.
 	 */
 	@Override
-	public byte[] getPictureData(Album album, Picture picture) {
-		// TODO: obtain remote information 
-		return null;
+	public byte[] getPictureData(Album album, Picture picture){
+		// TODO: obtain remote information
+		try{
+			return server.getPictureData(album.getName(), picture.getName());
+		}catch (Exception e) {
+			return null;
+		}
 	}
 
 	/**
@@ -134,7 +139,10 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public Album createAlbum(String name) {
-		// TODO: contact servers to create album 
+		// TODO: contact servers to create album
+		if(!server.createAlbum(name)){
+			return null;
+		}
 		return new SharedAlbum(name);
 	}
 
@@ -144,6 +152,10 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	@Override
 	public void deleteAlbum(Album album) {
 		// TODO: contact servers to delete album 
+		try {
+			server.deleteAlbum(album.getName());
+		}catch (Exception e){
+		}
 	}
 
 	/**
