@@ -18,7 +18,7 @@ import javax.xml.ws.Endpoint;
 @WebService
 public class ServerSOAP {
 
-	private static final String DEFAULT_ALBUM_FILESYSTEM = "/home/miguel/AlbumFileSystem2";
+	private static final String DEFAULT_ALBUM_FILESYSTEM = "/home/miguel/AlbumFileSystem";
 	private File basePath;
 
 	public ServerSOAP () {
@@ -35,7 +35,7 @@ public class ServerSOAP {
 	public String [] listAlbums () throws FileNotFoundException {
 		System.out.println("Listing all albums");
 		if(basePath.exists() && basePath.isDirectory()){
-			return basePath.list();		//TODO: return only directories				
+			return basePath.list();				
 		}else {
 			//throw new FileNotFoundException ("File not found :" + basePath);
 			return null;
@@ -48,7 +48,7 @@ public class ServerSOAP {
 
 		File f = new File (basePath, album);
 		if(f.exists() && f.isDirectory()){
-			return f.list();		//TODO: return only files				
+			return f.list();				
 		}else {
 			return null;
 		}
@@ -65,7 +65,7 @@ public class ServerSOAP {
 			return Files.readAllBytes(f.toPath());
 		else
 			return null;
-			//throw new FileNotFoundException();
+		//throw new FileNotFoundException();
 	}
 
 	@WebMethod
@@ -86,7 +86,7 @@ public class ServerSOAP {
 
 		File f = new File(basePath, album);
 		try{
-			Files.delete(f.toPath());
+			Files.delete(f.toPath()); //if exception is thrown no picture is deleted
 		}catch(NoSuchFileException e){
 			//e.printStackTrace();
 		}catch(DirectoryNotEmptyException e){
@@ -97,17 +97,20 @@ public class ServerSOAP {
 
 	@WebMethod
 	public boolean uploadPicture(String album, String name, byte[] data) {
-		// TODO: contact servers to add picture name with contents data 
 		System.out.println(String.format("Creating new picture %s in %s album", name, album));
 		try{
 			String aux = String.format("%s", album);
 			File f = new File(basePath, aux);
+			/*
+			 * Assuming that the server which the picture is going to be written to, is random or has some algorithm of selection
+			 * if album doesnt exists in this server, create album and upload picture there
+			 */
 			if(!f.exists())
 				createAlbum(album);
-			
+
 			aux = String.format("%s/%s", album, name);
 			f = new File(basePath, aux);
-			
+
 			FileOutputStream fos = new FileOutputStream(f.getAbsolutePath());
 			fos.write(data);
 			fos.close();
@@ -124,7 +127,7 @@ public class ServerSOAP {
 		String aux = String.format("%s/%s", album, picture);
 		File f = new File(basePath, aux);
 		try{
-			Files.delete(f.toPath());
+			Files.delete(f.toPath()); //if exception is thrown no picture is deleted
 		}catch(NoSuchFileException e){
 			//e.printStackTrace();
 		}
@@ -132,7 +135,7 @@ public class ServerSOAP {
 
 	public static void main (String [] args) throws IOException {
 		//publish endpoint server
-		Endpoint.publish("http://localhost:8081/FileServer", new ServerSOAP());
+		Endpoint.publish("http://localhost:8080/FileServer", new ServerSOAP());
 		System.err.println("FileServer started");
 
 		//Creating Multicast Socket
@@ -161,8 +164,9 @@ public class ServerSOAP {
 	 * @throws IOException
 	 */
 	public static void processMessage (DatagramPacket packet, MulticastSocket socket) throws IOException {	
+		// TODO: Security system for UDP messages lost
 		if(new String (packet.getData(), 0, packet.getLength()).equals("Album Server")){
-			byte[] input = new String ("http://localhost:8081/FileServer").getBytes();
+			byte[] input = new String ("http://localhost:8080/FileServer").getBytes();
 			DatagramPacket reply = new DatagramPacket( input, input.length );
 			reply.setAddress(packet.getAddress());
 			reply.setPort(packet.getPort());

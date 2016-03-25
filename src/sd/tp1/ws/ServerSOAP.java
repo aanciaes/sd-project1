@@ -1,5 +1,5 @@
 
-package sd.clt.ws;
+package sd.tp1.ws;
 
 import java.util.List;
 import javax.jws.WebMethod;
@@ -34,8 +34,8 @@ public interface ServerSOAP {
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "listAlbums", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.ListAlbums")
-    @ResponseWrapper(localName = "listAlbumsResponse", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.ListAlbumsResponse")
+    @RequestWrapper(localName = "listAlbums", targetNamespace = "http://srv.sd/", className = "sd.tp1.ws.ListAlbums")
+    @ResponseWrapper(localName = "listAlbumsResponse", targetNamespace = "http://srv.sd/", className = "sd.tp1.ws.ListAlbumsResponse")
     @Action(input = "http://srv.sd/ServerSOAP/listAlbumsRequest", output = "http://srv.sd/ServerSOAP/listAlbumsResponse", fault = {
         @FaultAction(className = FileNotFoundException_Exception.class, value = "http://srv.sd/ServerSOAP/listAlbums/Fault/FileNotFoundException")
     })
@@ -52,8 +52,8 @@ public interface ServerSOAP {
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "listPictures", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.ListPictures")
-    @ResponseWrapper(localName = "listPicturesResponse", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.ListPicturesResponse")
+    @RequestWrapper(localName = "listPictures", targetNamespace = "http://srv.sd/", className = "sd.tp1.ws.ListPictures")
+    @ResponseWrapper(localName = "listPicturesResponse", targetNamespace = "http://srv.sd/", className = "sd.tp1.ws.ListPicturesResponse")
     @Action(input = "http://srv.sd/ServerSOAP/listPicturesRequest", output = "http://srv.sd/ServerSOAP/listPicturesResponse", fault = {
         @FaultAction(className = FileNotFoundException_Exception.class, value = "http://srv.sd/ServerSOAP/listPictures/Fault/FileNotFoundException")
     })
@@ -73,8 +73,8 @@ public interface ServerSOAP {
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "getPictureData", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.GetPictureData")
-    @ResponseWrapper(localName = "getPictureDataResponse", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.GetPictureDataResponse")
+    @RequestWrapper(localName = "getPictureData", targetNamespace = "http://srv.sd/", className = "sd.tp1.ws.GetPictureData")
+    @ResponseWrapper(localName = "getPictureDataResponse", targetNamespace = "http://srv.sd/", className = "sd.tp1.ws.GetPictureDataResponse")
     @Action(input = "http://srv.sd/ServerSOAP/getPictureDataRequest", output = "http://srv.sd/ServerSOAP/getPictureDataResponse", fault = {
         @FaultAction(className = IOException_Exception.class, value = "http://srv.sd/ServerSOAP/getPictureData/Fault/IOException")
     })
@@ -94,8 +94,8 @@ public interface ServerSOAP {
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "createAlbum", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.CreateAlbum")
-    @ResponseWrapper(localName = "createAlbumResponse", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.CreateAlbumResponse")
+    @RequestWrapper(localName = "createAlbum", targetNamespace = "http://srv.sd/", className = "sd.tp1.ws.CreateAlbum")
+    @ResponseWrapper(localName = "createAlbumResponse", targetNamespace = "http://srv.sd/", className = "sd.tp1.ws.CreateAlbumResponse")
     @Action(input = "http://srv.sd/ServerSOAP/createAlbumRequest", output = "http://srv.sd/ServerSOAP/createAlbumResponse")
     public boolean createAlbum(
         @WebParam(name = "arg0", targetNamespace = "")
@@ -107,8 +107,8 @@ public interface ServerSOAP {
      * @throws IOException_Exception
      */
     @WebMethod
-    @RequestWrapper(localName = "deleteAlbum", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.DeleteAlbum")
-    @ResponseWrapper(localName = "deleteAlbumResponse", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.DeleteAlbumResponse")
+    @RequestWrapper(localName = "deleteAlbum", targetNamespace = "http://srv.sd/", className = "sd.tp1.ws.DeleteAlbum")
+    @ResponseWrapper(localName = "deleteAlbumResponse", targetNamespace = "http://srv.sd/", className = "sd.tp1.ws.DeleteAlbumResponse")
     @Action(input = "http://srv.sd/ServerSOAP/deleteAlbumRequest", output = "http://srv.sd/ServerSOAP/deleteAlbumResponse", fault = {
         @FaultAction(className = IOException_Exception.class, value = "http://srv.sd/ServerSOAP/deleteAlbum/Fault/IOException")
     })
@@ -128,8 +128,8 @@ public interface ServerSOAP {
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "uploadPicture", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.UploadPicture")
-    @ResponseWrapper(localName = "uploadPictureResponse", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.UploadPictureResponse")
+    @RequestWrapper(localName = "uploadPicture", targetNamespace = "http://srv.sd/", className = "sd.tp1.ws.UploadPicture")
+    @ResponseWrapper(localName = "uploadPictureResponse", targetNamespace = "http://srv.sd/", className = "sd.tp1.ws.UploadPictureResponse")
     @Action(input = "http://srv.sd/ServerSOAP/uploadPictureRequest", output = "http://srv.sd/ServerSOAP/uploadPictureResponse")
     public boolean uploadPicture(
         @WebParam(name = "arg0", targetNamespace = "")
@@ -146,8 +146,8 @@ public interface ServerSOAP {
      * @throws IOException_Exception
      */
     @WebMethod
-    @RequestWrapper(localName = "deletePicture", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.DeletePicture")
-    @ResponseWrapper(localName = "deletePictureResponse", targetNamespace = "http://srv.sd/", className = "sd.clt.ws.DeletePictureResponse")
+    @RequestWrapper(localName = "deletePicture", targetNamespace = "http://srv.sd/", className = "sd.tp1.ws.DeletePicture")
+    @ResponseWrapper(localName = "deletePictureResponse", targetNamespace = "http://srv.sd/", className = "sd.tp1.ws.DeletePictureResponse")
     @Action(input = "http://srv.sd/ServerSOAP/deletePictureRequest", output = "http://srv.sd/ServerSOAP/deletePictureResponse", fault = {
         @FaultAction(className = IOException_Exception.class, value = "http://srv.sd/ServerSOAP/deletePicture/Fault/IOException")
     })

@@ -1,5 +1,5 @@
 
-package sd.clt.ws;
+package sd.tp1.ws;
 
 import javax.xml.ws.WebFault;
 
@@ -10,8 +10,8 @@ import javax.xml.ws.WebFault;
  * Generated source version: 2.2
  * 
  */
-@WebFault(name = "FileNotFoundException", targetNamespace = "http://srv.sd/")
-public class FileNotFoundException_Exception
+@WebFault(name = "IOException", targetNamespace = "http://srv.sd/")
+public class IOException_Exception
     extends Exception
 {
 
@@ -19,14 +19,14 @@ public class FileNotFoundException_Exception
      * Java type that goes as soapenv:Fault detail element.
      * 
      */
-    private FileNotFoundException faultInfo;
+    private IOException faultInfo;
 
     /**
      * 
      * @param message
      * @param faultInfo
      */
-    public FileNotFoundException_Exception(String message, FileNotFoundException faultInfo) {
+    public IOException_Exception(String message, IOException faultInfo) {
         super(message);
         this.faultInfo = faultInfo;
     }
@@ -37,7 +37,7 @@ public class FileNotFoundException_Exception
      * @param faultInfo
      * @param cause
      */
-    public FileNotFoundException_Exception(String message, FileNotFoundException faultInfo, Throwable cause) {
+    public IOException_Exception(String message, IOException faultInfo, Throwable cause) {
         super(message, cause);
         this.faultInfo = faultInfo;
     }
@@ -45,9 +45,9 @@ public class FileNotFoundException_Exception
     /**
      * 
      * @return
-     *     returns fault bean: sd.clt.ws.FileNotFoundException
+     *     returns fault bean: sd.tp1.ws.IOException
      */
-    public FileNotFoundException getFaultInfo() {
+    public IOException getFaultInfo() {
         return faultInfo;
     }
 

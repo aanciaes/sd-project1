@@ -1,5 +1,5 @@
 
-package sd.clt.ws;
+package sd.tp1.ws;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -7,12 +7,12 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for deleteAlbum complex type.
+ * <p>Java class for listPictures complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="deleteAlbum">
+ * &lt;complexType name="listPictures">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
@@ -26,10 +26,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "deleteAlbum", propOrder = {
+@XmlType(name = "listPictures", propOrder = {
     "arg0"
 })
-public class DeleteAlbum {
+public class ListPictures {
 
     protected String arg0;
 

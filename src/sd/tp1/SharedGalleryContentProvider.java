@@ -1,6 +1,5 @@
 package sd.tp1;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -9,35 +8,31 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import sd.clt.ws.IOException_Exception;
-import sd.clt.ws.ServerSOAP;
-import sd.clt.ws.ServerSOAPService;
 import sd.tp1.gui.GalleryContentProvider;
-import sd.tp1.gui.GalleryContentProvider.Album;
 import sd.tp1.gui.Gui;
+import sd.tp1.ws.IOException_Exception;
+import sd.tp1.ws.ServerSOAP;
+import sd.tp1.ws.ServerSOAPService;
 
 /*
  * This class provides the album/picture content to the gui/main application.
  * 
- * Project 1 implementation should complete this class. 
+ * TODO: Security system for UDP messages lost
+ * TODO: Cache System
  */
 public class SharedGalleryContentProvider implements GalleryContentProvider{
 
+	
+	public static final int TIMEOUT = 2000; 
 	Gui gui;
 	List<ServerSOAP> servers;
-	//ServerSOAP server;
-
 	private int roundRobin;
 
 	SharedGalleryContentProvider() throws IOException {
-		// TODO: code to do when shared gallery starts
 		roundRobin=0;
 		servers = new ArrayList<ServerSOAP>();
 
@@ -47,9 +42,8 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 			System.out.println( "Use range : 224.0.0.0 -- 239.255.255.255");
 		}
 		MulticastSocket socket = new MulticastSocket() ;
-
-		String url="";
-
+		
+		// TODO: Security system for UDP messages lost
 		while (true){
 			byte[] input = ("Album Server").getBytes();
 			DatagramPacket packet = new DatagramPacket( input, input.length );
@@ -59,15 +53,15 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 
 			byte[] buffer = new byte[65536] ;
 			DatagramPacket url_packet = new DatagramPacket( buffer, buffer.length );
-			socket.setSoTimeout(3000);
+			socket.setSoTimeout(TIMEOUT);
 			while(true){
 				try{
 					socket.receive(url_packet);
 					addServer(url_packet);
 				}catch (SocketTimeoutException e){
+					//No more servers respond to client request
 					break;
 				}
-
 			}
 			System.out.println(servers.size());
 			break;
@@ -84,7 +78,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 
 			ServerSOAPService service = new ServerSOAPService (wsURL);
 			servers.add(service.getServerSOAPPort());
-			//server = service.getServerSOAPPort();
 		} catch (Exception e){
 			System.err.println("Erro " + e.getMessage());
 		}
@@ -186,7 +179,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public byte[] getPictureData(Album album, Picture picture){
-		// TODO: obtain remote information
 		Iterator<ServerSOAP> it = servers.iterator();
 		while(it.hasNext()){
 			try{
@@ -207,7 +199,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public Album createAlbum(String name) {
-		// TODO: contact servers to create album
 		if(!getServer().createAlbum(name)){
 			return null;
 		}
@@ -219,7 +210,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public void deleteAlbum(Album album) {
-		// TODO: contact servers to delete album 
 		try {
 			Iterator<ServerSOAP> i = servers.iterator();
 			while(i.hasNext())
@@ -234,7 +224,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public Picture uploadPicture(Album album, String name, byte[] data) {
-		// TODO: contact servers to add picture name with contents data
 		if(getServer().uploadPicture(album.getName(), name, data)){
 			return new SharedPicture(name);
 		}
@@ -248,7 +237,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public boolean deletePicture(Album album, Picture picture) {
-		// TODO: contact servers to delete picture from album
 		try{
 			Iterator<ServerSOAP> i = servers.iterator();
 			while(i.hasNext())

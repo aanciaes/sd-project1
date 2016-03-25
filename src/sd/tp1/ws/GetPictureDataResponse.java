@@ -1,5 +1,5 @@
 
-package sd.clt.ws;
+package sd.tp1.ws;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;

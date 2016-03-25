@@ -1,26 +1,23 @@
 
-package sd.clt.ws;
+package sd.tp1.ws;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for uploadPicture complex type.
+ * <p>Java class for getPictureData complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="uploadPicture">
+ * &lt;complexType name="getPictureData">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="arg0" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="arg1" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="arg2" type="{http://www.w3.org/2001/XMLSchema}base64Binary" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -30,17 +27,14 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "uploadPicture", propOrder = {
+@XmlType(name = "getPictureData", propOrder = {
     "arg0",
-    "arg1",
-    "arg2"
+    "arg1"
 })
-public class UploadPicture {
+public class GetPictureData {
 
     protected String arg0;
     protected String arg1;
-    @XmlElementRef(name = "arg2", type = JAXBElement.class, required = false)
-    protected JAXBElement<byte[]> arg2;
 
     /**
      * Gets the value of the arg0 property.
@@ -88,30 +82,6 @@ public class UploadPicture {
      */
     public void setArg1(String value) {
         this.arg1 = value;
-    }
-
-    /**
-     * Gets the value of the arg2 property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link JAXBElement }{@code <}{@link byte[]}{@code >}
-     *     
-     */
-    public JAXBElement<byte[]> getArg2() {
-        return arg2;
-    }
-
-    /**
-     * Sets the value of the arg2 property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link byte[]}{@code >}
-     *     
-     */
-    public void setArg2(JAXBElement<byte[]> value) {
-        this.arg2 = value;
     }
 
 }

@@ -1,5 +1,5 @@
 
-package sd.clt.ws;
+package sd.tp1.ws;
 
 import java.net.MalformedURLException;
 import java.net.URL;
