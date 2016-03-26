@@ -3,11 +3,14 @@ package sd.tp1;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Base64;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.jersey.client.ClientConfig;
@@ -20,22 +23,25 @@ import sd.tp1.gui.Gui;
  */
 public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 
+
+	private static final int ACCEPTED = 200;
+
 	Gui gui;	
 	ClientConfig config;
 	Client client;
 	WebTarget target;
-	
-	
+
+
 	SharedGalleryContentProviderREST() {
 		// TODO: code to do when shared gallery starts
 		config = new ClientConfig();
 		client = ClientBuilder.newClient(config);
 		target = client.target(getBaseURI());
 	}
-	
+
 	private static URI getBaseURI() {
-	    return UriBuilder.fromUri("http://localhost:9090/").build();
-	  }
+		return UriBuilder.fromUri("http://localhost:9090/").build();
+	}
 
 
 	/**
@@ -55,10 +61,10 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 	@Override
 	public List<Album> getListOfAlbums() {		
 		List<Album> lst = new ArrayList<Album>();
-	    String [] array = target.path("/Albuns")
-	    		.request()
-	    		.accept(MediaType.APPLICATION_JSON)
-	    		.get(String[].class);
+		String [] array = target.path("/albuns")
+				.request()
+				.accept(MediaType.APPLICATION_JSON)
+				.get(String[].class);
 		for(int i=0;i<array.length;i++)
 			lst.add(new SharedAlbum(array[i]));
 		return lst;
@@ -72,11 +78,10 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 	@Override
 	public List<Picture> getListOfPictures(Album album) {
 		List<Picture> lst = new ArrayList<Picture>();
-	    String path = String.format("/Albuns/%s", album.getName());
-		String [] array = target.path(path)
-	    		.request()
-	    		.accept(MediaType.APPLICATION_JSON)
-	    		.get(String[].class);
+
+		String path = String.format("/albuns/%s", album.getName());
+		String [] array = target.path(path).request().accept(MediaType.APPLICATION_JSON).get(String[].class);
+
 		for(int i=0;i<array.length;i++)
 			lst.add(new SharedPicture(array[i]));
 		return lst;
@@ -88,8 +93,13 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 	 */
 	@Override
 	public byte[] getPictureData(Album album, Picture picture) {
-		// TODO: obtain remote information 
-		return null;
+		String path = String.format("/albuns/%s/%s", album.getName(), picture.getName());
+
+		byte [] pictureData = target.path(path).request().accept(MediaType.APPLICATION_OCTET_STREAM).get(byte[].class);
+		if(pictureData.length>0)
+			return pictureData;
+		else
+			return null;
 	}
 
 	/**
@@ -98,8 +108,14 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 	 */
 	@Override
 	public Album createAlbum(String name) {
-		// TODO: contact servers to create album 
-		return new SharedAlbum(name);
+		String path = String.format("/albuns/newAlbum/%s", name);
+		Response response = target.path(path).
+				request().post(Entity.entity(name, MediaType.APPLICATION_JSON)); 
+		if(response.getStatus()==ACCEPTED)
+			return new SharedAlbum(name);
+		else{
+			return null;
+		}
 	}
 
 	/**
@@ -107,7 +123,14 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 	 */
 	@Override
 	public void deleteAlbum(Album album) {
-		// TODO: contact servers to delete album 
+		String path = String.format("/albuns/delete/%s", album.getName());
+		Response response = target.path(path).request().delete();
+
+		if(response.getStatus()==ACCEPTED)
+			System.out.println(String.format("Album %s deleted", album.getName()));
+		else
+			System.out.println("Album not deleted");
+
 	}
 
 	/**
@@ -116,8 +139,15 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 	 */
 	@Override
 	public Picture uploadPicture(Album album, String name, byte[] data) {
-		// TODO: contact servers to add picture name with contents data 
-		return new SharedPicture(name);
+		String aux = Base64.getUrlEncoder().encodeToString(data);
+		String path = String.format("/albuns/%s/newPicture/%s/%s", album.getName(), name, aux);	
+		
+		Response response = target.path(path).request().post(Entity.entity(aux, MediaType.APPLICATION_JSON));
+
+		if(response.getStatus()==ACCEPTED)
+			return new SharedPicture(name);
+		else
+			return null;
 	}
 
 	/**
@@ -126,8 +156,13 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 	 */
 	@Override
 	public boolean deletePicture(Album album, Picture picture) {
-		// TODO: contact servers to delete picture from album 
-		return true;
+		String path = String.format("/albuns/delete/%s/%s", album.getName(), picture.getName());
+		Response response = target.path(path).request().delete();
+
+		if(response.getStatus()==ACCEPTED)
+			return true;
+		else
+			return false;
 	}
 
 
