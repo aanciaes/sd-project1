@@ -1,8 +1,10 @@
 package sd.srv.rest;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.util.Base64;
 
@@ -20,13 +22,13 @@ import javax.ws.rs.core.Response.Status;
 @Path("/albuns")
 public class SharedGalleryResources {
 
-	private static final String DEFAULT_ALBUM_FILESYSTEM = "/home/miguel/AlbumFileSystem";
+	private static final String DEFAULT_ALBUM_FILESYSTEM = "/home/miguel/AlbumFileSystem2";
 	private File basePath = new File (DEFAULT_ALBUM_FILESYSTEM);
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response listAlbums() {
-		System.err.printf("listAlbuns()\n");
+		System.out.println("Listing all Albuns");
 		if(basePath.exists() && basePath.isDirectory()){
 			return Response.ok(basePath.list()).build();				
 		}else 
@@ -37,7 +39,7 @@ public class SharedGalleryResources {
 	@Path("/{album}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getListOfPictures(@PathParam("album") String album) {
-		System.err.printf("getList of Pictres( album: %s)", album);
+		System.out.println(String.format("Listing all pictures ( album: %s)", album));
 
 		File f = new File (basePath, album);
 
@@ -52,7 +54,7 @@ public class SharedGalleryResources {
 	@Path("/{album}/{picture}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response getPictureData(@PathParam("album") String album, @PathParam ("picture") String picture) throws IOException {
-		System.err.printf("getList of Pictres( album: %s)", album);
+		System.out.println(String.format("Acessing picture %s data ( album: %s)", picture, album));
 
 		String aux = String.format("%s/%s", album, picture);
 
@@ -90,8 +92,13 @@ public class SharedGalleryResources {
 		try{
 			Files.delete(f.toPath());
 			return Response.ok().build();
-		}catch (Exception e){
+		}catch (FileNotFoundException e){
 			return Response.status(Status.NOT_FOUND).build();
+		}catch(DirectoryNotEmptyException e){
+			System.out.println("Album not empty. Album not deleted");
+			return Response.status(Status.BAD_REQUEST).build();
+		}catch (Exception e){
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 	}
 
@@ -107,16 +114,21 @@ public class SharedGalleryResources {
 		try{
 			Files.delete(f.toPath());
 			return Response.ok().build();
-		}catch (Exception e){
-			e.printStackTrace();
+		}catch (FileNotFoundException e){
 			return Response.status(Status.NOT_FOUND).build();
+		}catch(DirectoryNotEmptyException e){
+			System.out.println("Album not empty. Album not deleted");
+			return Response.status(Status.BAD_REQUEST).build();
+		}catch (Exception e){
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 	}
-	
+
 	@POST
 	@Path("/{album}/newPicture/{picture}/{data}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response uploadPicture (@PathParam("album") String album, @PathParam("picture") String picture, @PathParam("data") String data) {
+		System.out.println(String.format("Uploading picture %s (album : %s)", picture, album));
 
 		String aux = String.format("%s", album);
 		File f = new File(basePath, aux);
@@ -127,7 +139,7 @@ public class SharedGalleryResources {
 		aux = String.format("%s/%s", album, picture);
 		f = new File(basePath, aux);
 		byte [] pictureData = Base64.getUrlDecoder().decode(data);
-		
+
 		try{
 			FileOutputStream fos = new FileOutputStream(f.getAbsolutePath());
 			fos.write(pictureData);

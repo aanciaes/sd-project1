@@ -26,7 +26,7 @@ import sd.tp1.ws.ServerSOAPService;
  */
 public class SharedGalleryContentProvider implements GalleryContentProvider{
 
-	
+
 	public static final int TIMEOUT = 2000; 
 	Gui gui;
 	List<ServerSOAP> servers;
@@ -42,7 +42,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 			System.out.println( "Use range : 224.0.0.0 -- 239.255.255.255");
 		}
 		MulticastSocket socket = new MulticastSocket() ;
-		
+
 		// TODO: Security system for UDP messages lost
 		while (true){
 			byte[] input = ("Album Server").getBytes();
@@ -133,16 +133,16 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	}
 
 	private boolean albumExists (List<Album> lst, SharedAlbum album){
-		
+
 		Iterator<Album> t = lst.iterator();
 		while(t.hasNext()){
 			if(album.getName().equals(t.next().getName()))
 				return true;
 		}
 		return false;
-		
+
 	}
-	
+
 	/**
 	 * Returns the list of pictures for the given album. 
 	 * On error this method should return null.

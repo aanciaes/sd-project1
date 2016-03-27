@@ -12,15 +12,15 @@ import sd.tp1.gui.impl.GalleryWindow;
 public class SharedGallery extends Application {
 
 	GalleryWindow window;
-	
+
 	public SharedGallery() throws IOException {
 		window = new GalleryWindow( new SharedGalleryContentProvider());
 	}	
-	
-    public static void main(String[] args){
-    	launch(args);
-    }
-    
+
+	public static void main(String[] args){
+		launch(args);
+	}
+
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		window.start(primaryStage);
