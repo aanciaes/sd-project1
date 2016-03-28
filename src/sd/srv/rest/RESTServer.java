@@ -17,7 +17,7 @@ public class RESTServer {
 
 	public static void main(String[] args) throws Exception {
 
-		URI baseUri = UriBuilder.fromUri("http://0.0.0.0/").port(9091).build();
+		URI baseUri = UriBuilder.fromUri("http://0.0.0.0/").port(9090).build();
 
 		ResourceConfig config = new ResourceConfig();
 
@@ -56,7 +56,7 @@ public class RESTServer {
 	public static void processMessage (DatagramPacket packet, MulticastSocket socket) throws IOException {	
 		// TODO: Security system for UDP messages lost
 		if(new String (packet.getData(), 0, packet.getLength()).equals("Album Server")){
-			byte[] input = new String ("http://localhost:9091/").getBytes();
+			byte[] input = new String ("http://localhost:9090/").getBytes();
 			DatagramPacket reply = new DatagramPacket( input, input.length );
 			reply.setAddress(packet.getAddress());
 			reply.setPort(packet.getPort());

@@ -30,8 +30,9 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 
 	private static final int ACCEPTED = 200;
 	private static final int TIMEOUT = 2000;
-	private int roundRobin;
+	private int roundRobin; //variable to "randomize" writing to servers
 
+	//All servers
 	List<WebTarget> servers;
 	Gui gui;	
 
@@ -40,6 +41,7 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		roundRobin=0;
 		servers = new ArrayList<WebTarget>();
 
+		//Creating multicast sockets to discover availables servers
 		final int port = 9000 ;
 		final InetAddress address = InetAddress.getByName( "224.0.0.0" ) ;
 		if( ! address.isMulticastAddress()) {
@@ -87,6 +89,10 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		}
 	}
 
+	/**
+	 * Method to "randomize" servers
+	 * @return Web Target (server)
+	 */
 	public WebTarget getServer () {
 		if(roundRobin==servers.size())
 			roundRobin=0;
@@ -124,6 +130,12 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		return lst;
 	}
 
+	/**
+	 * Checks if there is an album in given list
+	 * @param lst list
+	 * @param album album
+	 * @return true if album already exists in list
+	 */
 	private boolean albumExists (List<Album> lst, SharedAlbum album){
 		Iterator<Album> t = lst.iterator();
 		while(t.hasNext()){
@@ -144,19 +156,21 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 
 		List<Picture> lst = new ArrayList<Picture>();
 		String path = String.format("/albuns/%s", album.getName());
-		Iterator<WebTarget> t = servers.iterator();
-		while(t.hasNext()){
-			try{
-				String [] array = t.next().path(path).request().accept(MediaType.APPLICATION_JSON).get(String[].class);
-				for(int i=0;i<array.length;i++)
-					lst.add(new SharedPicture(array[i]));
-			}catch(javax.ws.rs.NotFoundException e){
+		try{
+			Iterator<WebTarget> t = servers.iterator();
+			while(t.hasNext()){
+				try{
+					String [] array = t.next().path(path).request().accept(MediaType.APPLICATION_JSON).get(String[].class);
+					for(int i=0;i<array.length;i++)
+						lst.add(new SharedPicture(array[i]));
+				}catch(javax.ws.rs.NotFoundException e){
+				}
 			}
-
-		}
-		if(lst.isEmpty())
+			return lst;
+		}catch(Exception e ){
 			return null;
-		return lst;
+		}
+
 	}
 
 	/**
@@ -175,7 +189,8 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 				if(pictureData.length>0)
 					return pictureData;
 			}catch (javax.ws.rs.NotFoundException e) {
-
+			}
+			catch(javax.ws.rs.BadRequestException e){
 			}
 		}
 		return null;

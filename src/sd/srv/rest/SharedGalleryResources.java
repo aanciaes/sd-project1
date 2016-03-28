@@ -22,7 +22,7 @@ import javax.ws.rs.core.Response.Status;
 @Path("/albuns")
 public class SharedGalleryResources {
 
-	private static final String DEFAULT_ALBUM_FILESYSTEM = "/home/miguel/AlbumFileSystem2";
+	private static final String DEFAULT_ALBUM_FILESYSTEM = "/home/miguel/AlbumFileSystem";
 	private File basePath = new File (DEFAULT_ALBUM_FILESYSTEM);
 
 	@GET
@@ -53,17 +53,19 @@ public class SharedGalleryResources {
 	@GET
 	@Path("/{album}/{picture}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response getPictureData(@PathParam("album") String album, @PathParam ("picture") String picture) throws IOException {
+	public Response getPictureData(@PathParam("album") String album, @PathParam ("picture") String picture){
 		System.out.println(String.format("Acessing picture %s data ( album: %s)", picture, album));
 
 		String aux = String.format("%s/%s", album, picture);
 
 		File f = new File (basePath, aux);
 
-		if(f.exists()){
+		try{
 			return Response.ok(Files.readAllBytes(f.toPath())).build();				
-		}else {
+		}catch(FileNotFoundException e){
 			return Response.status(Status.NOT_FOUND).build();
+		}catch(IOException e){
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 	}
 
@@ -116,9 +118,6 @@ public class SharedGalleryResources {
 			return Response.ok().build();
 		}catch (FileNotFoundException e){
 			return Response.status(Status.NOT_FOUND).build();
-		}catch(DirectoryNotEmptyException e){
-			System.out.println("Album not empty. Album not deleted");
-			return Response.status(Status.BAD_REQUEST).build();
 		}catch (Exception e){
 			return Response.status(Status.BAD_REQUEST).build();
 		}
@@ -133,14 +132,20 @@ public class SharedGalleryResources {
 		String aux = String.format("%s", album);
 		File f = new File(basePath, aux);
 
+		/*
+		 * Assuming that the server which the picture is going to be written to, is random or has some algorithm of selection
+		 * if album doesnt exists in this server, create album and upload picture there
+		 */
 		if(!f.exists())
 			createAlbum(album);
 
 		aux = String.format("%s/%s", album, picture);
 		f = new File(basePath, aux);
+		//Picture data is uploaded encoded in Base64 as a URL String. Decoding needed
 		byte [] pictureData = Base64.getUrlDecoder().decode(data);
 
 		try{
+			//Writing byte array to file
 			FileOutputStream fos = new FileOutputStream(f.getAbsolutePath());
 			fos.write(pictureData);
 			fos.close();
