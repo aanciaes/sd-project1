@@ -7,8 +7,11 @@ import java.net.MulticastSocket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -19,8 +22,10 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.client.ClientConfig;
 
+import sd.srv.rest.ServerREST;
 import sd.tp1.gui.GalleryContentProvider;
 import sd.tp1.gui.Gui;
+import sd.tp1.ws.ServerSOAP;
 
 /*
  * This class provides the album/picture content to the gui/main application.
@@ -33,13 +38,13 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 	private int roundRobin; //variable to "randomize" writing to servers
 
 	//All servers
-	List<WebTarget> servers;
+	Map<String, WebTarget> servers;
 	Gui gui;	
 
 
 	SharedGalleryContentProviderREST() throws IOException {
 		roundRobin=0;
-		servers = new ArrayList<WebTarget>();
+		servers = new ConcurrentHashMap<String, WebTarget>();
 
 		//Creating multicast sockets to discover availables servers
 		final int port = 9000 ;
@@ -52,7 +57,7 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		// TODO: Security system for UDP messages lost
 		while (true){
 			byte[] input = ("Album Server").getBytes();
-			DatagramPacket packet = new DatagramPacket( input, input.length );
+			DatagramPacket packet = new DatagramPacket( input, input.length);
 			packet.setAddress(address);
 			packet.setPort(port);
 			socket.send(packet);
@@ -63,19 +68,19 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 			while(true){
 				try{
 					socket.receive(url_packet);
-					addServer(url_packet);
+					addServer(url_packet, servers);
 				}catch (SocketTimeoutException e){
 					//No more servers respond to client request
 					break;
 				}
 			}
-			System.out.println(servers.size());
+			System.out.println(servers.keySet().toString());
 			break;
 		}
 		socket.close(); 
 	}
 
-	private void addServer (DatagramPacket url_packet) {
+	private void addServer (DatagramPacket url_packet, Map<String, WebTarget> map) {
 		try {
 			String url = new String (url_packet.getData(), 0, url_packet.getLength());
 
@@ -83,7 +88,7 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 			Client client = ClientBuilder.newClient(config);
 			WebTarget target = client.target(url);
 
-			servers.add(target);
+			map.put(url, target);
 		} catch (Exception e){
 			System.err.println("Erro " + e.getMessage());
 		}
@@ -94,9 +99,10 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 	 * @return Web Target (server)
 	 */
 	public WebTarget getServer () {
-		if(roundRobin==servers.size())
+		if(roundRobin==servers.size()){
 			roundRobin=0;
-		return servers.get(roundRobin++);
+		}
+		return (WebTarget) servers.values().toArray() [roundRobin++];
 	}
 
 	/**
@@ -106,6 +112,30 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 	public void register(Gui gui) {
 		if( this.gui == null ) {
 			this.gui = gui;
+			Thread keepAlive = new Thread(new Runnable(){
+				public void run(){
+					while(true){
+						try {
+							Thread.sleep(5000);
+							Map<String, WebTarget> connections = processKeepAlive();
+							for(String key : servers.keySet()){
+								if(!connections.containsKey(key)){
+									servers.remove(key);
+									System.out.println("Server Down");
+									gui.updateAlbums();
+								}
+							}
+						} catch (InterruptedException e) {
+							//e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							//e.printStackTrace();
+						}
+
+					}
+				}
+			});
+			keepAlive.start();
 		}
 	}
 
@@ -118,7 +148,7 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		System.out.println("Listing all albuns");
 
 		List<Album> lst = new ArrayList<Album>();
-		Iterator<WebTarget> t = servers.iterator();
+		Iterator<WebTarget> t = servers.values().iterator();
 		while(t.hasNext()){
 			String [] array = t.next().path("/albuns").request().accept(MediaType.APPLICATION_JSON).get(String[].class);
 			for(int i=0;i<array.length;i++){
@@ -157,7 +187,7 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		List<Picture> lst = new ArrayList<Picture>();
 		String path = String.format("/albuns/%s", album.getName());
 		try{
-			Iterator<WebTarget> t = servers.iterator();
+			Iterator<WebTarget> t = servers.values().iterator();
 			while(t.hasNext()){
 				try{
 					String [] array = t.next().path(path).request().accept(MediaType.APPLICATION_JSON).get(String[].class);
@@ -170,7 +200,6 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		}catch(Exception e ){
 			return null;
 		}
-
 	}
 
 	/**
@@ -181,7 +210,7 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 	public byte[] getPictureData(Album album, Picture picture) {
 		System.out.println(String.format("Acessing picture %s data (album : %s)", picture.getName(), album.getName()));
 
-		Iterator<WebTarget> t = servers.iterator();
+		Iterator<WebTarget> t = servers.values().iterator();
 		String path = String.format("/albuns/%s/%s", album.getName(), picture.getName());
 		while(t.hasNext()){
 			try{
@@ -205,10 +234,15 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		System.out.println(String.format("Creating album named %s", name));
 
 		String path = String.format("/albuns/newAlbum/%s", name);
+		SharedAlbum album = new SharedAlbum(name);
+		if(albumExists(getListOfAlbums(), album)){
+			System.out.println("Album already exists. Album not created");
+			return null;
+		}
 		Response response = getServer().path(path).
 				request().post(Entity.entity(name, MediaType.APPLICATION_JSON)); 
 		if(response.getStatus()==ACCEPTED)
-			return new SharedAlbum(name);
+			return album;
 		else{
 			return null;
 		}
@@ -222,7 +256,7 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		System.out.println(String.format("Deleting album %s", album.getName()));
 
 		String path = String.format("/albuns/delete/%s", album.getName());
-		Iterator<WebTarget> t = servers.iterator();
+		Iterator<WebTarget> t = servers.values().iterator();
 		while(t.hasNext()){
 			t.next().path(path).request().delete();			
 		}	
@@ -256,7 +290,7 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		System.out.println(String.format("Deleting picture %s (album : %s)", picture.getName(), album.getName()));
 
 		String path = String.format("/albuns/delete/%s/%s", album.getName(), picture.getName());
-		Iterator<WebTarget> t = servers.iterator();
+		Iterator<WebTarget> t = servers.values().iterator();
 		while(t.hasNext()){
 			Response response = t.next().path(path).request().delete();
 
@@ -266,6 +300,39 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		return false;
 	}
 
+	public Map<String, WebTarget> processKeepAlive () throws IOException {
+		final int port = 9000 ;
+		final InetAddress address = InetAddress.getByName( "224.0.0.0" ) ;
+		if( ! address.isMulticastAddress()) {
+			System.out.println( "Use range : 224.0.0.0 -- 239.255.255.255");
+		}
+		MulticastSocket socket = new MulticastSocket() ;
+
+		// TODO: Security system for UDP messages lost
+
+		byte[] input = new String("SharedGallery Keep Alive").getBytes();
+		DatagramPacket packet = new DatagramPacket( input, input.length );
+		packet.setAddress(address);
+		packet.setPort(port);
+		socket.send(packet);
+
+		byte[] buffer = new byte[65536] ;
+		DatagramPacket url_packet = new DatagramPacket( buffer, buffer.length );
+		socket.setSoTimeout(TIMEOUT);
+		Map<String, WebTarget> connections = new HashMap<String, WebTarget>();
+		while(true){
+			try{
+				socket.receive(url_packet);
+				addServer(url_packet, connections);
+			}catch (SocketTimeoutException e){
+				//No more servers respond to client request
+				break;
+			}
+		}
+		socket.close(); 
+		return connections;
+	}
+	
 
 	/**
 	 * Represents a shared album.

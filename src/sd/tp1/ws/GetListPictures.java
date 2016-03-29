@@ -7,12 +7,12 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for listPictures complex type.
+ * <p>Java class for getListPictures complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="listPictures">
+ * &lt;complexType name="getListPictures">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
@@ -26,10 +26,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "listPictures", propOrder = {
+@XmlType(name = "getListPictures", propOrder = {
     "arg0"
 })
-public class ListPictures {
+public class GetListPictures {
 
     protected String arg0;
 

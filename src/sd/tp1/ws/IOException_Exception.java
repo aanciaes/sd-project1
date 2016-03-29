@@ -10,7 +10,7 @@ import javax.xml.ws.WebFault;
  * Generated source version: 2.2
  * 
  */
-@WebFault(name = "IOException", targetNamespace = "http://srv.sd/")
+@WebFault(name = "IOException", targetNamespace = "http://srv.testSD/")
 public class IOException_Exception
     extends Exception
 {

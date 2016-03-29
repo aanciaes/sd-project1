@@ -1,11 +1,8 @@
 package sd.srv.rest;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.Files;
 import java.util.Base64;
 
 import javax.ws.rs.Consumes;
@@ -19,80 +16,74 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import sd.srv.BasicServer;
+
 @Path("/albuns")
 public class SharedGalleryResources {
 
-	private static final String DEFAULT_ALBUM_FILESYSTEM = "/home/miguel/AlbumFileSystem";
-	private File basePath = new File (DEFAULT_ALBUM_FILESYSTEM);
-
+	private BasicServer server = new BasicServer("/home/miguel/AlbumFileSystem");
+	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response listAlbums() {
 		System.out.println("Listing all Albuns");
-		if(basePath.exists() && basePath.isDirectory()){
-			return Response.ok(basePath.list()).build();				
-		}else 
+		String [] albuns = server.getListAlbuns();
+		if(albuns!=null)
+			return Response.ok(albuns).build();
+		else
 			return Response.status(Status.NOT_FOUND).build();
 	}
-
+	
 	@GET
 	@Path("/{album}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getListOfPictures(@PathParam("album") String album) {
 		System.out.println(String.format("Listing all pictures ( album: %s)", album));
 
-		File f = new File (basePath, album);
+		String [] pictures = server.getListPictures(album);
 
-		if(f.exists() && f.isDirectory()){
-			return Response.ok(f.list()).build();				
+		if(pictures!=null){
+			return Response.ok(pictures).build();				
 		}else {
 			return Response.status(Status.NOT_FOUND).build();
 		}
 	}
-
+	
 	@GET
 	@Path("/{album}/{picture}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response getPictureData(@PathParam("album") String album, @PathParam ("picture") String picture){
 		System.out.println(String.format("Acessing picture %s data ( album: %s)", picture, album));
 
-		String aux = String.format("%s/%s", album, picture);
-
-		File f = new File (basePath, aux);
-
 		try{
-			return Response.ok(Files.readAllBytes(f.toPath())).build();				
+			return Response.ok(server.getPictureData(album, picture)).build();				
 		}catch(FileNotFoundException e){
 			return Response.status(Status.NOT_FOUND).build();
 		}catch(IOException e){
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 	}
-
+	
 	@POST
 	@Path("/newAlbum/{album}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response createAlbum (@PathParam("album") String album) {
 		System.out.println(String.format("Creating new album named %s", album));
 
-		File f = new File(basePath, album);
-
-		if(!f.exists() && f.mkdir())
+		if(server.createAlbum(album))
 			return Response.ok().build();
 		else 
 			return Response.status(Status.BAD_REQUEST).build();	
 	}
-
+	
 	@DELETE
 	@Path("/delete/{album}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response deleteAlbum (@PathParam("album") String album) {
 		System.out.println(String.format("Deleting %s", album));
 
-		File f = new File (basePath, album);
-
 		try{
-			Files.delete(f.toPath());
+			server.deleteAlbum(album);
 			return Response.ok().build();
 		}catch (FileNotFoundException e){
 			return Response.status(Status.NOT_FOUND).build();
@@ -103,18 +94,15 @@ public class SharedGalleryResources {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 	}
-
+	
 	@DELETE
 	@Path("/delete/{album}/{picture}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response deletePicture (@PathParam("album") String album, @PathParam("picture") String picture) {
 		System.out.println(String.format("Deleting %s of %s",picture, album));
 
-		String aux = String.format("%s/%s", album, picture);
-		File f = new File (basePath, aux);
-
 		try{
-			Files.delete(f.toPath());
+			server.deletePicture(album, picture);
 			return Response.ok().build();
 		}catch (FileNotFoundException e){
 			return Response.status(Status.NOT_FOUND).build();
@@ -122,33 +110,18 @@ public class SharedGalleryResources {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 	}
-
+	
 	@POST
 	@Path("/{album}/newPicture/{picture}/{data}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response uploadPicture (@PathParam("album") String album, @PathParam("picture") String picture, @PathParam("data") String data) {
 		System.out.println(String.format("Uploading picture %s (album : %s)", picture, album));
 
-		String aux = String.format("%s", album);
-		File f = new File(basePath, aux);
-
-		/*
-		 * Assuming that the server which the picture is going to be written to, is random or has some algorithm of selection
-		 * if album doesnt exists in this server, create album and upload picture there
-		 */
-		if(!f.exists())
-			createAlbum(album);
-
-		aux = String.format("%s/%s", album, picture);
-		f = new File(basePath, aux);
 		//Picture data is uploaded encoded in Base64 as a URL String. Decoding needed
 		byte [] pictureData = Base64.getUrlDecoder().decode(data);
 
 		try{
-			//Writing byte array to file
-			FileOutputStream fos = new FileOutputStream(f.getAbsolutePath());
-			fos.write(pictureData);
-			fos.close();
+			server.uploadPicture(album, picture, pictureData);
 			return Response.ok().build();
 		}catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).build();
