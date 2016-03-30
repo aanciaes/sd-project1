@@ -1,4 +1,4 @@
-package sd.tp1;
+package sd.tp1.soap;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import sd.tp1.CacheSystem;
 import sd.tp1.gui.GalleryContentProvider;
 import sd.tp1.gui.Gui;
 import sd.tp1.ws.ServerSOAP;
@@ -31,11 +32,14 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 
 	public static final int TIMEOUT = 2000; 
 	Gui gui;
+	
 	Map<String, ServerSOAP> servers;
+	CacheSystem cache;
 	int roundRobin;
 
 	SharedGalleryContentProvider() throws IOException {
 		servers = new ConcurrentHashMap<String, ServerSOAP>();
+		cache = new CacheSystem();
 		roundRobin=0;
 
 		final int port = 9000 ;
@@ -88,6 +92,9 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public void register(Gui gui) {
 		if( this.gui == null ) {
 			this.gui = gui;
+			
+			cache.setAlbumList(getListOfAlbums());
+
 			Thread keepAlive = new Thread(new Runnable(){
 				public void run(){
 					while(true){

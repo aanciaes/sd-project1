@@ -1,4 +1,4 @@
-package sd.tp1;
+package sd.tp1.soap;
 
 import java.io.IOException;
 
