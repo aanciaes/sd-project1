@@ -78,6 +78,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 			URL wsURL = new URL(String.format("%s", url));
 
 			ServerSOAPService service = new ServerSOAPService (wsURL);
+			
 			map.put(url, service.getServerSOAPPort());
 		} catch (Exception e){
 			//System.err.println("Erro " + e.getMessage());
@@ -138,7 +139,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		System.out.println("Listing all albuns");
 		try{
 			List<Album> lst = new ArrayList<Album>();
-			List <String> aux = new LinkedList<String>();
+			List <String> aux = new ArrayList<String>();
 
 			Iterator<ServerSOAP> it = servers.values().iterator();
 			while(it.hasNext()){
@@ -177,7 +178,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		System.out.println(String.format("Listing all pictures (album : %s)", album.getName()));
 		try{
 			List<Picture> lst = new ArrayList<Picture>();
-			List <String> aux = new LinkedList<String>();
+			List <String> aux = new ArrayList<String>();
 
 			Iterator<ServerSOAP> it = servers.values().iterator();
 			while(it.hasNext()){

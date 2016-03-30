@@ -27,6 +27,24 @@ public interface ServerSOAP {
 
     /**
      * 
+     * @param arg1
+     * @param arg0
+     * @return
+     *     returns byte[]
+     */
+    @WebMethod
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "getPictureData", targetNamespace = "http://soap.srv.sd/", className = "sd.tp1.ws.GetPictureData")
+    @ResponseWrapper(localName = "getPictureDataResponse", targetNamespace = "http://soap.srv.sd/", className = "sd.tp1.ws.GetPictureDataResponse")
+    @Action(input = "http://soap.srv.sd/ServerSOAP/getPictureDataRequest", output = "http://soap.srv.sd/ServerSOAP/getPictureDataResponse")
+    public byte[] getPictureData(
+        @WebParam(name = "arg0", targetNamespace = "")
+        String arg0,
+        @WebParam(name = "arg1", targetNamespace = "")
+        String arg1);
+
+    /**
+     * 
      * @param arg0
      * @return
      *     returns java.util.List<java.lang.String>
@@ -51,24 +69,6 @@ public interface ServerSOAP {
     @ResponseWrapper(localName = "getListAlbunsResponse", targetNamespace = "http://soap.srv.sd/", className = "sd.tp1.ws.GetListAlbunsResponse")
     @Action(input = "http://soap.srv.sd/ServerSOAP/getListAlbunsRequest", output = "http://soap.srv.sd/ServerSOAP/getListAlbunsResponse")
     public List<String> getListAlbuns();
-
-    /**
-     * 
-     * @param arg1
-     * @param arg0
-     * @return
-     *     returns byte[]
-     */
-    @WebMethod
-    @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "getPictureData", targetNamespace = "http://soap.srv.sd/", className = "sd.tp1.ws.GetPictureData")
-    @ResponseWrapper(localName = "getPictureDataResponse", targetNamespace = "http://soap.srv.sd/", className = "sd.tp1.ws.GetPictureDataResponse")
-    @Action(input = "http://soap.srv.sd/ServerSOAP/getPictureDataRequest", output = "http://soap.srv.sd/ServerSOAP/getPictureDataResponse")
-    public byte[] getPictureData(
-        @WebParam(name = "arg0", targetNamespace = "")
-        String arg0,
-        @WebParam(name = "arg1", targetNamespace = "")
-        String arg1);
 
     /**
      * 

@@ -74,7 +74,6 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 					break;
 				}
 			}
-			System.out.println(servers.keySet().toString());
 			break;
 		}
 		socket.close(); 
@@ -90,7 +89,7 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 
 			map.put(url, target);
 		} catch (Exception e){
-			System.err.println("Erro " + e.getMessage());
+			//System.err.println("Erro " + e.getMessage());
 		}
 	}
 
@@ -241,6 +240,7 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		}
 		Response response = getServer().path(path).
 				request().post(Entity.entity(name, MediaType.APPLICATION_JSON)); 
+		
 		if(response.getStatus()==ACCEPTED)
 			return album;
 		else{

@@ -50,7 +50,6 @@ public class ServerREST {
 			DatagramPacket packet = new DatagramPacket( buffer, buffer.length );
 			socket.receive(packet);
 			processMessage (packet, socket);
-			
 		}
 	}
 
@@ -64,6 +63,7 @@ public class ServerREST {
 		// TODO: Security system for UDP messages lost
 		if(new String (packet.getData(), 0, packet.getLength()).equals("Album Server") || 
 				new String (packet.getData(), 0, packet.getLength()).equals("SharedGallery Keep Alive")){
+			
 			String hostname = localhostAddress().toString();
 			String address = String.format("http:/%s:%d",hostname,PORT);
 			

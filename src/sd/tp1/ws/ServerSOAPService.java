@@ -17,7 +17,7 @@ import javax.xml.ws.WebServiceFeature;
  * Generated source version: 2.2
  * 
  */
-@WebServiceClient(name = "ServerSOAPService", targetNamespace = "http://soap.srv.sd/", wsdlLocation = "http://192.168.11.54:8081/FileServer?wsdl")
+@WebServiceClient(name = "ServerSOAPService", targetNamespace = "http://soap.srv.sd/", wsdlLocation = "http://10.22.205.155:8081/FileServer?wsdl")
 public class ServerSOAPService
     extends Service
 {
@@ -30,7 +30,7 @@ public class ServerSOAPService
         URL url = null;
         WebServiceException e = null;
         try {
-            url = new URL("http://192.168.11.54:8081/FileServer?wsdl");
+            url = new URL("http://10.22.205.155:8081/FileServer?wsdl");
         } catch (MalformedURLException ex) {
             e = new WebServiceException(ex);
         }
