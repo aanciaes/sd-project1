@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -93,14 +92,13 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public void register(Gui gui) {
 		if( this.gui == null ) {
 			this.gui = gui;
-			
-			cache.setAlbumList(getListOfAlbums());
 
 			Thread keepAlive = new Thread(new Runnable(){
 				public void run(){
 					while(true){
 						try {
 							Thread.sleep(5000);
+							cache.updateCache();
 							Map<String, ServerSOAP> connections = processKeepAlive();
 							for(String key : servers.keySet()){
 								if(!connections.containsKey(key)){
@@ -203,10 +201,19 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	@Override
 	public byte[] getPictureData(Album album, Picture picture){
 		System.out.println(String.format("Acessing picture %s data (album : %s)", picture.getName(), album.getName()));
+		
 		Iterator<ServerSOAP> it = servers.values().iterator();
 		while(it.hasNext()){
 			try{
-				byte [] pictureData = it.next().getPictureData(album.getName(), picture.getName());
+				byte [] pictureData;
+				if(cache.isInCache(picture.getName())){
+					System.out.println("On cache");
+					pictureData = cache.getData(picture.getName());
+				}
+				else{
+					pictureData = it.next().getPictureData(album.getName(), picture.getName());
+					cache.addPicture(picture.getName(), pictureData);
+				}
 				if(pictureData.length>0)
 					return pictureData;
 			}catch(NullPointerException e){
@@ -252,6 +259,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public Picture uploadPicture(Album album, String name, byte[] data) {
 		System.out.println(String.format("Uploading picture %s (album : %s)", name, album));
 		if(getServer().uploadPicture(album.getName(), name, data)){
+			cache.addPicture(name, data);
 			return new SharedPicture(name);
 		}
 		return null;
@@ -271,6 +279,8 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 					i.next().deletePicture(album.getName(), picture.getName());
 				}catch (NullPointerException e){
 				}
+			if(cache.isInCache(picture.getName()))
+				cache.deletePicture(picture.getName());
 			return true;
 		}catch(Exception e){
 			return false;

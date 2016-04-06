@@ -24,8 +24,10 @@ public class ServerREST {
 	
 	public static void main(String[] args) throws Exception {
 
-		URI baseUri = UriBuilder.fromUri("http://0.0.0.0/").port(PORT).build();
-
+		String address = localhostAddress().toString();
+		
+		URI baseUri = UriBuilder.fromUri(String.format("http:/%s/ServerRest", address)).port(PORT).build();
+		
 		ResourceConfig config = new ResourceConfig();
 
 		config.register(SharedGalleryResources.class);
@@ -35,14 +37,14 @@ public class ServerREST {
 		System.err.println("REST Server ready... ");
 
 		//Creating Multicast Socket
-		final InetAddress address = InetAddress.getByName("224.0.0.0");
-		if(!address.isMulticastAddress()) {
+		final InetAddress address_multi = InetAddress.getByName("224.0.0.0");
+		if(!address_multi.isMulticastAddress()) {
 			System.out.println( "Use range : 224.0.0.0 -- 239.255.255.255");
 			System.exit(1);
 		}
 
 		MulticastSocket socket = new MulticastSocket(9000);
-		socket.joinGroup(address);
+		socket.joinGroup(address_multi);
 
 		//Waiting for a client request
 		while(true) {
@@ -65,7 +67,7 @@ public class ServerREST {
 				new String (packet.getData(), 0, packet.getLength()).equals("SharedGallery Keep Alive")){
 			
 			String hostname = localhostAddress().toString();
-			String address = String.format("http:/%s:%d",hostname,PORT);
+			String address = String.format("http:/%s:%d/ServerRest",hostname,PORT);
 			
 			byte[] input = new String (address).getBytes();
 			DatagramPacket reply = new DatagramPacket( input, input.length );

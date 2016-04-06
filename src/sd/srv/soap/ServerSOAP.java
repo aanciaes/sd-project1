@@ -92,7 +92,8 @@ public class ServerSOAP {
 		//publish endpoint server
 		
 		String hostname = localhostAddress().toString();
-		String address = String.format("http:/%s:%d/",hostname,PORT);
+		String address = String.format("http:/%s:%d/ServerSoap",hostname,PORT);
+		System.out.println(address);
 	
 		Endpoint.publish(address, new ServerSOAP());
 		System.err.println("FileServer started");
@@ -128,7 +129,7 @@ public class ServerSOAP {
 				new String (packet.getData(), 0, packet.getLength()).equals("SharedGallery Keep Alive")){
 			
 			String hostname = localhostAddress().toString();
-			String address = String.format("http:/%s:%d",hostname,PORT);
+			String address = String.format("http:/%s:%d/ServerSoap",hostname,PORT);
 			
 			byte[] input = new String (address).getBytes();
 			DatagramPacket reply = new DatagramPacket( input, input.length );
