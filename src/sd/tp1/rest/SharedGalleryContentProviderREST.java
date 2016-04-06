@@ -21,8 +21,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.message.internal.CacheControlProvider;
 
 import sd.srv.rest.ServerREST;
+import sd.tp1.CacheSystem;
 import sd.tp1.gui.GalleryContentProvider;
 import sd.tp1.gui.Gui;
 import sd.tp1.ws.ServerSOAP;
@@ -39,12 +41,14 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 
 	//All servers
 	Map<String, WebTarget> servers;
+	CacheSystem cache;
 	Gui gui;	
 
 
 	SharedGalleryContentProviderREST() throws IOException {
 		roundRobin=0;
 		servers = new ConcurrentHashMap<String, WebTarget>();
+		cache = new CacheSystem();
 
 		//Creating multicast sockets to discover availables servers
 		final int port = 9000 ;
@@ -116,6 +120,7 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 					while(true){
 						try {
 							Thread.sleep(5000);
+							cache.updateCache();
 							Map<String, WebTarget> connections = processKeepAlive();
 							for(String key : servers.keySet()){
 								if(!connections.containsKey(key)){
@@ -213,9 +218,17 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		String path = String.format("/albuns/%s/%s", album.getName(), picture.getName());
 		while(t.hasNext()){
 			try{
-				byte [] pictureData = t.next().path(path).request().accept(MediaType.APPLICATION_OCTET_STREAM).get(byte[].class);
-				if(pictureData.length>0)
-					return pictureData;
+				byte [] pictureData;
+				if(cache.isInCache(picture.getName())){
+					pictureData=cache.getData(picture.getName());
+					System.out.println("Cache Hit");
+				}else {
+					pictureData = t.next().path(path).request().accept(MediaType.APPLICATION_OCTET_STREAM).get(byte[].class);
+					if(pictureData.length>0){
+						cache.addPicture(picture.getName(), pictureData);
+						return pictureData;
+					}
+				}
 			}catch (javax.ws.rs.NotFoundException e) {
 			}
 			catch(javax.ws.rs.BadRequestException e){
@@ -240,7 +253,7 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		}
 		Response response = getServer().path(path).
 				request().post(Entity.entity(name, MediaType.APPLICATION_JSON)); 
-		
+
 		if(response.getStatus()==ACCEPTED)
 			return album;
 		else{
@@ -275,8 +288,10 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 
 		Response response = getServer().path(path).request().post(Entity.entity(aux, MediaType.APPLICATION_JSON));
 
-		if(response.getStatus()==ACCEPTED)
+		if(response.getStatus()==ACCEPTED){
+			cache.addPicture(name, data);
 			return new SharedPicture(name);
+		}
 		else
 			return null;
 	}
@@ -294,8 +309,10 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		while(t.hasNext()){
 			Response response = t.next().path(path).request().delete();
 
-			if(response.getStatus()==ACCEPTED)
+			if(response.getStatus()==ACCEPTED){
+				cache.deletePicture(picture.getName());
 				return true;
+			}
 		}
 		return false;
 	}
@@ -332,7 +349,7 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		socket.close(); 
 		return connections;
 	}
-	
+
 
 	/**
 	 * Represents a shared album.

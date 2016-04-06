@@ -113,7 +113,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 							// TODO Auto-generated catch block
 							//e.printStackTrace();
 						}
-
 					}
 				}
 			});
@@ -212,7 +211,8 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 				}
 				else{
 					pictureData = it.next().getPictureData(album.getName(), picture.getName());
-					cache.addPicture(picture.getName(), pictureData);
+					if(pictureData!=null)
+						cache.addPicture(picture.getName(), pictureData);
 				}
 				if(pictureData.length>0)
 					return pictureData;
