@@ -27,21 +27,15 @@ public interface ServerSOAP {
 
     /**
      * 
-     * @param arg1
-     * @param arg0
      * @return
-     *     returns byte[]
+     *     returns java.util.List<java.lang.String>
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "getPictureData", targetNamespace = "http://soap.srv.sd/", className = "sd.tp1.ws.GetPictureData")
-    @ResponseWrapper(localName = "getPictureDataResponse", targetNamespace = "http://soap.srv.sd/", className = "sd.tp1.ws.GetPictureDataResponse")
-    @Action(input = "http://soap.srv.sd/ServerSOAP/getPictureDataRequest", output = "http://soap.srv.sd/ServerSOAP/getPictureDataResponse")
-    public byte[] getPictureData(
-        @WebParam(name = "arg0", targetNamespace = "")
-        String arg0,
-        @WebParam(name = "arg1", targetNamespace = "")
-        String arg1);
+    @RequestWrapper(localName = "getListAlbuns", targetNamespace = "http://soap.srv.sd/", className = "sd.tp1.ws.GetListAlbuns")
+    @ResponseWrapper(localName = "getListAlbunsResponse", targetNamespace = "http://soap.srv.sd/", className = "sd.tp1.ws.GetListAlbunsResponse")
+    @Action(input = "http://soap.srv.sd/ServerSOAP/getListAlbunsRequest", output = "http://soap.srv.sd/ServerSOAP/getListAlbunsResponse")
+    public List<String> getListAlbuns();
 
     /**
      * 
@@ -60,15 +54,21 @@ public interface ServerSOAP {
 
     /**
      * 
+     * @param arg1
+     * @param arg0
      * @return
-     *     returns java.util.List<java.lang.String>
+     *     returns byte[]
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "getListAlbuns", targetNamespace = "http://soap.srv.sd/", className = "sd.tp1.ws.GetListAlbuns")
-    @ResponseWrapper(localName = "getListAlbunsResponse", targetNamespace = "http://soap.srv.sd/", className = "sd.tp1.ws.GetListAlbunsResponse")
-    @Action(input = "http://soap.srv.sd/ServerSOAP/getListAlbunsRequest", output = "http://soap.srv.sd/ServerSOAP/getListAlbunsResponse")
-    public List<String> getListAlbuns();
+    @RequestWrapper(localName = "getPictureData", targetNamespace = "http://soap.srv.sd/", className = "sd.tp1.ws.GetPictureData")
+    @ResponseWrapper(localName = "getPictureDataResponse", targetNamespace = "http://soap.srv.sd/", className = "sd.tp1.ws.GetPictureDataResponse")
+    @Action(input = "http://soap.srv.sd/ServerSOAP/getPictureDataRequest", output = "http://soap.srv.sd/ServerSOAP/getPictureDataResponse")
+    public byte[] getPictureData(
+        @WebParam(name = "arg0", targetNamespace = "")
+        String arg0,
+        @WebParam(name = "arg1", targetNamespace = "")
+        String arg1);
 
     /**
      * 

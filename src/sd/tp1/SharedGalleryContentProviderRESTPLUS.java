@@ -7,6 +7,7 @@ import java.net.MulticastSocket;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -31,7 +32,7 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 	private static final int ACCEPTED = 200;
 	private static final int TIMEOUT = 2000;
 	private int roundRobinRest,roundRobinSoap, count; //variable to "randomize" writing to servers
-	
+
 	//All servers
 	Map<String, WebTarget> serversRest;
 	Map<String, ServerSOAP> serversSoap;
@@ -77,22 +78,22 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 		}
 		socket.close(); 
 	}
-	
+
 	public WebTarget getServerRest () {
-		
+
 		if(roundRobinRest==serversRest.size()){
 			roundRobinRest=0;
 		}
 		return (WebTarget) serversRest.values().toArray() [roundRobinRest++];
 	}
-	
+
 	public ServerSOAP getServerSoap () {
 		if(roundRobinSoap==serversSoap.size()){
 			roundRobinSoap=0;
 		}
 		return (ServerSOAP) serversSoap.values().toArray() [roundRobinSoap++];
 	}
-	
+
 
 	private void addServer(DatagramPacket url_packet, Map<String, WebTarget> map, Map<String, ServerSOAP> map2){
 		try {
@@ -186,10 +187,8 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 				if(s.hasNext()){
 					try{
 						List <String> aux = new ArrayList<String>();
-
-						Iterator<ServerSOAP> it = serversSoap.values().iterator();
-						while(it.hasNext()){
-							Collection<String> collection = it.next().getListPictures(album.getName());
+						while(s.hasNext()){
+							Collection<String> collection = s.next().getListPictures(album.getName());
 							aux.addAll(collection);
 						}
 						Iterator<String> i = aux.iterator();
@@ -217,7 +216,7 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 
 		Iterator<WebTarget> t = serversRest.values().iterator();
 		Iterator<ServerSOAP> s = serversSoap.values().iterator();
-		
+
 		String path = String.format("/albuns/%s/%s", album.getName(), picture.getName());
 		while(t.hasNext() || s.hasNext()){
 			if(t.hasNext()){
@@ -232,11 +231,17 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 				}
 			}
 			if(s.hasNext()){
-				
+				try{
+					byte [] pictureData = s.next().getPictureData(album.getName(), picture.getName());
+					if(pictureData.length>0)
+						return pictureData;
+				}
+				catch(NullPointerException e){
+				}
 			}
 		}
 		return null;
-		
+
 	}
 
 	@Override
@@ -249,72 +254,130 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 			return null;
 		}
 		else{
-			
-			if(++count%2==0){ 
+
+			if(count++%2==0){ 
 				getServerSoap().createAlbum(name);
 			}
 			else {
 				Response response = getServerRest().path(path).
-				request().post(Entity.entity(name, MediaType.APPLICATION_JSON)); 
-		
+						request().post(Entity.entity(name, MediaType.APPLICATION_JSON)); 
+
 				if(response.getStatus()==ACCEPTED)
 					return album;
 				else{
 					return null;
 				}
 			}
+
 		}
-		
+
+
 		return null;
 	}
 
 	@Override
 	public Picture uploadPicture(Album album, String name, byte[] data) {
-		// TODO Auto-generated method stub
+		System.out.println(String.format("Uploading Picture %s (album : %s)", name, album.getName()));
+		String aux = Base64.getUrlEncoder().encodeToString(data);
+		String path = String.format("/albuns/%s/newPicture/%s/%s", album.getName(), name, aux);
+		if(count++%2==0){
+			if(getServerSoap().uploadPicture(album.getName(), name, data)){
+				return new SharedPicture(name);
+			}
+		}
+		else{
+			Response response = getServerRest().path(path).request().post(Entity.entity(aux, MediaType.APPLICATION_JSON));
+			if(response.getStatus()==ACCEPTED)
+				return new SharedPicture(name);
+			else
+				return null;
+		}
 		return null;
 	}
 
 	@Override
-	public void deleteAlbum(Album album) {
-		// TODO Auto-generated method stub
+	public void deleteAlbum(Album album){
+		System.out.println(String.format("Deleting album %s", album.getName()));
 
+		String path = String.format("/albuns/delete/%s", album.getName());
+		Iterator<WebTarget> t = serversRest.values().iterator();
+		Iterator<ServerSOAP> s = serversSoap.values().iterator();
+		while(t.hasNext() || s.hasNext()){	
+			if(t.hasNext()){
+				t.next().path(path).request().delete();	
+			}
+			if(s.hasNext()){
+				try{
+					s.next().deleteAlbum(album.getName());
+				}
+				catch(Exception e){
+				}
+			}
+		}
 	}
 
 	@Override
 	public boolean deletePicture(Album album, Picture picture) {
-		// TODO Auto-generated method stub
+		System.out.println(String.format("Deleting picture %s (album : %s)", picture.getName(), album.getName()));
+		String path = String.format("/albuns/delete/%s/%s", album.getName(), picture.getName());
+		Iterator<WebTarget> t = serversRest.values().iterator();
+		Iterator<ServerSOAP> s = serversSoap.values().iterator();
+		try{
+			while(t.hasNext() || s.hasNext()){	
+				if(t.hasNext()){
+					Response response = t.next().path(path).request().delete();
+
+					if(response.getStatus()==ACCEPTED)
+						return true;
+					
+				}
+
+				if(s.hasNext()){
+					try{
+						s.next().deletePicture(album.getName(), picture.getName());
+					}
+					catch (NullPointerException e){
+					}
+					return true;
+				}
+				
+			}
+		}
+		catch(Exception e){
+			return false;
+		}
 		return false;
 	}
 
-	/**
-	 * Represents a shared album.
-	 */
-	static class SharedAlbum implements GalleryContentProvider.Album {
-		final String name;
+		/**
+		 * Represents a shared album.
+		 */
+		static class SharedAlbum implements GalleryContentProvider.Album {
+			final String name;
 
-		SharedAlbum(String name) {
-			this.name = name;
+			SharedAlbum(String name) {
+				this.name = name;
+			}
+
+			@Override
+			public String getName() {
+				return name;
+			}
 		}
 
-		@Override
-		public String getName() {
-			return name;
+		/**
+		 * Represents a shared picture.
+		 */
+		static class SharedPicture implements GalleryContentProvider.Picture {
+			final String name;
+
+			SharedPicture(String name) {
+				this.name = name;
+			}
+
+			@Override
+			public String getName() {
+				return name;
+			}
 		}
 	}
-
-	/**
-	 * Represents a shared picture.
-	 */
-	static class SharedPicture implements GalleryContentProvider.Picture {
-		final String name;
-
-		SharedPicture(String name) {
-			this.name = name;
-		}
-
-		@Override
-		public String getName() {
-			return name;
-		}
-	}
-}
