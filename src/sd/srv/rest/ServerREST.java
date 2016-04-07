@@ -18,16 +18,21 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import com.sun.net.httpserver.HttpServer;;
 
+/**
+ * Class that implements REST webServices
+ * @author miguel
+ *
+ */
 public class ServerREST {
 
 	public static final int PORT = 9090;
-	
+
 	public static void main(String[] args) throws Exception {
 
 		String address = localhostAddress().toString();
-		
+
 		URI baseUri = UriBuilder.fromUri(String.format("http:/%s/ServerRest", address)).port(PORT).build();
-		
+
 		ResourceConfig config = new ResourceConfig();
 
 		config.register(SharedGalleryResources.class);
@@ -56,19 +61,19 @@ public class ServerREST {
 	}
 
 	/**
-	 * Processing client request
+	 * Processing client request. Sends message to client with server location
 	 * @param packet Packet containing the request
 	 * @param socket Muitcast Socket to reply to client
 	 * @throws IOException
 	 */
 	public static void processMessage (DatagramPacket packet, MulticastSocket socket) throws IOException {	
-		// TODO: Security system for UDP messages lost
+		
 		if(new String (packet.getData(), 0, packet.getLength()).equals("Album Server") || 
 				new String (packet.getData(), 0, packet.getLength()).equals("SharedGallery Keep Alive")){
-			
+
 			String hostname = localhostAddress().toString();
 			String address = String.format("http:/%s:%d/ServerRest",hostname,PORT);
-			
+
 			byte[] input = new String (address).getBytes();
 			DatagramPacket reply = new DatagramPacket( input, input.length );
 			reply.setAddress(packet.getAddress());
@@ -76,7 +81,7 @@ public class ServerREST {
 			socket.send(reply);
 		}
 	}
-	
+
 
 	/**
 	 * Return the IPv4 address of the local machine that is not a loopback address if available.

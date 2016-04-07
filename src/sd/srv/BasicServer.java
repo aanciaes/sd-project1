@@ -5,6 +5,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 
+/**
+ * Class that handles all basic operations on disk (File System)
+ *
+ */
 public class BasicServer {
 
 	private File basePath;

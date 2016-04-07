@@ -18,22 +18,27 @@ import javax.ws.rs.core.Response.Status;
 
 import sd.srv.BasicServer;
 
+/**
+ * Rest web service resources
+ */
 @Path("/albuns")
 public class SharedGalleryResources {
 
+	//Basic server handles operations on disk (File System)
 	private BasicServer server = new BasicServer("/home/miguel/AlbumFileSystem");
-	
+
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response listAlbums() {
 		System.out.println("Listing all Albuns");
+		
 		String [] albuns = server.getListAlbuns();
 		if(albuns!=null)
 			return Response.ok(albuns).build();
 		else
 			return Response.status(Status.NOT_FOUND).build();
 	}
-	
+
 	@GET
 	@Path("/{album}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -48,7 +53,7 @@ public class SharedGalleryResources {
 			return Response.status(Status.NOT_FOUND).build();
 		}
 	}
-	
+
 	@GET
 	@Path("/{album}/{picture}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
@@ -63,7 +68,7 @@ public class SharedGalleryResources {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 	}
-	
+
 	@POST
 	@Path("/newAlbum/{album}")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -75,7 +80,7 @@ public class SharedGalleryResources {
 		else 
 			return Response.status(Status.BAD_REQUEST).build();	
 	}
-	
+
 	@DELETE
 	@Path("/delete/{album}")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -94,7 +99,7 @@ public class SharedGalleryResources {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 	}
-	
+
 	@DELETE
 	@Path("/delete/{album}/{picture}")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -110,7 +115,7 @@ public class SharedGalleryResources {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 	}
-	
+
 	@POST
 	@Path("/{album}/newPicture/{picture}/{data}")
 	@Consumes(MediaType.APPLICATION_JSON)

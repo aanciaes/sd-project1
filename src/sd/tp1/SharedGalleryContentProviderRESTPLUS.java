@@ -28,14 +28,21 @@ import sd.tp1.gui.Gui;
 import sd.tp1.ws.ServerSOAP;
 import sd.tp1.ws.ServerSOAPService;
 
+/**
+ * Class that implements Rest plus client, a client that supports the two types of web services soap and rest
+ * @author miguel
+ *
+ */
 public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvider{
+
 	private static final int ACCEPTED = 200;
 	private static final int TIMEOUT = 2000;
-	private int roundRobinRest,roundRobinSoap, count; //variable to "randomize" writing to servers
+	private int roundRobinRest,roundRobinSoap, count; //variables to "randomize" writing to servers
 
 	//All servers
 	Map<String, WebTarget> serversRest;
 	Map<String, ServerSOAP> serversSoap;
+
 	Gui gui;	
 
 
@@ -54,7 +61,6 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 		}
 		MulticastSocket socket = new MulticastSocket() ;
 
-		// TODO: Security system for UDP messages lost
 		while (true){
 			byte[] input = ("Album Server").getBytes();
 			DatagramPacket packet = new DatagramPacket( input, input.length);
@@ -99,6 +105,7 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 		try {
 			String url = new String (url_packet.getData(), 0, url_packet.getLength());
 			String [] v = url.split("/");
+
 			if(v[3].equals("ServerRest")){
 				ClientConfig config = new ClientConfig();
 				Client client = ClientBuilder.newClient(config);
@@ -134,7 +141,6 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 		while(t.hasNext() || s.hasNext()){
 			if(t.hasNext()){
 
-
 				String [] array = t.next().path("/albuns").request().accept(MediaType.APPLICATION_JSON).get(String[].class);
 				for(int i=0;i<array.length;i++){
 					SharedAlbum album = new SharedAlbum(array[i]);
@@ -145,12 +151,13 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 			if(s.hasNext()){
 				Collection<String> collection = s.next().getListAlbuns();
 				aux.addAll(collection);
-			}
-			Iterator<String> i = aux.iterator();
-			while(i.hasNext()){
-				SharedAlbum album = new SharedAlbum(i.next());
-				if(!albumExists(lst, album))
-					lst.add(album);
+
+				Iterator<String> i = aux.iterator();
+				while(i.hasNext()){
+					SharedAlbum album = new SharedAlbum(i.next());
+					if(!albumExists(lst, album))
+						lst.add(album);
+				}
 			}
 		}
 		return lst;
@@ -241,37 +248,33 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 			}
 		}
 		return null;
-
 	}
 
 	@Override
 	public Album createAlbum(String name) {
 		System.out.println(String.format("Creating album named %s", name));
-		String path = String.format("/albuns/newAlbum/%s", name);
+		
 		SharedAlbum album = new SharedAlbum(name);
+		
 		if(albumExists(getListOfAlbums(), album)){
 			System.out.println("Album already exists. Album not created");
 			return null;
 		}
 		else{
-
 			if(count++%2==0){ 
-				getServerSoap().createAlbum(name);
+				if(getServerSoap().createAlbum(name))
+					return album;
 			}
 			else {
+				String path = String.format("/albuns/newAlbum/%s", name);
 				Response response = getServerRest().path(path).
 						request().post(Entity.entity(name, MediaType.APPLICATION_JSON)); 
 
 				if(response.getStatus()==ACCEPTED)
 					return album;
-				else{
-					return null;
-				}
 			}
 
 		}
-
-
 		return null;
 	}
 
@@ -329,7 +332,7 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 
 					if(response.getStatus()==ACCEPTED)
 						return true;
-					
+
 				}
 
 				if(s.hasNext()){
@@ -340,7 +343,7 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 					}
 					return true;
 				}
-				
+
 			}
 		}
 		catch(Exception e){
@@ -349,35 +352,35 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 		return false;
 	}
 
-		/**
-		 * Represents a shared album.
-		 */
-		static class SharedAlbum implements GalleryContentProvider.Album {
-			final String name;
+	/**
+	 * Represents a shared album.
+	 */
+	static class SharedAlbum implements GalleryContentProvider.Album {
+		final String name;
 
-			SharedAlbum(String name) {
-				this.name = name;
-			}
-
-			@Override
-			public String getName() {
-				return name;
-			}
+		SharedAlbum(String name) {
+			this.name = name;
 		}
 
-		/**
-		 * Represents a shared picture.
-		 */
-		static class SharedPicture implements GalleryContentProvider.Picture {
-			final String name;
-
-			SharedPicture(String name) {
-				this.name = name;
-			}
-
-			@Override
-			public String getName() {
-				return name;
-			}
+		@Override
+		public String getName() {
+			return name;
 		}
 	}
+
+	/**
+	 * Represents a shared picture.
+	 */
+	static class SharedPicture implements GalleryContentProvider.Picture {
+		final String name;
+
+		SharedPicture(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String getName() {
+			return name;
+		}
+	}
+}

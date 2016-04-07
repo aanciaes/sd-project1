@@ -23,17 +23,19 @@ import sd.tp1.ws.ServerSOAPService;
 /*
  * This class provides the album/picture content to the gui/main application.
  * 
- * TODO: Security system for UDP messages lost
- * TODO: Cache System
  */
 public class SharedGalleryContentProvider implements GalleryContentProvider{
-
 
 	public static final int TIMEOUT = 2000; 
 	Gui gui;
 	
+	//All servers
 	Map<String, ServerSOAP> servers;
+	
+	//cache system
 	CacheSystem cache;
+	
+	//variable to randomize writes to servers
 	int roundRobin;
 
 	SharedGalleryContentProvider() throws IOException {
@@ -47,8 +49,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 			System.out.println( "Use range : 224.0.0.0 -- 239.255.255.255");
 		}
 		MulticastSocket socket = new MulticastSocket() ;
-
-		// TODO: Security system for UDP messages lost
 
 		byte[] input = ("Album Server").getBytes();
 		DatagramPacket packet = new DatagramPacket( input, input.length );
@@ -110,7 +110,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 						} catch (InterruptedException e) {
 							//e.printStackTrace();
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
 							//e.printStackTrace();
 						}
 					}

@@ -34,7 +34,6 @@ import sd.tp1.ws.ServerSOAP;
  */
 public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 
-
 	private static final int ACCEPTED = 200;
 	private static final int TIMEOUT = 2000;
 	private int roundRobin; //variable to "randomize" writing to servers
@@ -42,6 +41,7 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 	//All servers
 	Map<String, WebTarget> servers;
 	CacheSystem cache;
+	
 	Gui gui;	
 
 
@@ -58,7 +58,6 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		}
 		MulticastSocket socket = new MulticastSocket() ;
 
-		// TODO: Security system for UDP messages lost
 		while (true){
 			byte[] input = ("Album Server").getBytes();
 			DatagramPacket packet = new DatagramPacket( input, input.length);
@@ -132,7 +131,6 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 						} catch (InterruptedException e) {
 							//e.printStackTrace();
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
 							//e.printStackTrace();
 						}
 

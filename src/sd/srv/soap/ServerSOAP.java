@@ -16,19 +16,22 @@ import javax.xml.ws.Endpoint;
 
 import sd.srv.BasicServer;
 
+/**
+ * Class that implements SOAP web services
+ */
 @WebService
 public class ServerSOAP {
 
-	public static final int PORT = 8081;
-	private static final String DEFAULT_ALBUM_FILESYSTEM = "/home/miguel/AlbumFileSystem2";
-	
-	BasicServer server;
+	public static final int PORT = 8080;
+	private static final String DEFAULT_ALBUM_FILESYSTEM = "/home/miguel/AlbumFileSystem";
 
+	//Basic web service performs all operations over Disk (File System)
+	BasicServer server;
 
 	public ServerSOAP () {
 		server = new BasicServer(DEFAULT_ALBUM_FILESYSTEM);
 	}
-	
+
 	@WebMethod
 	public String [] getListAlbuns () {
 		System.out.println("Listing all albuns");
@@ -50,13 +53,13 @@ public class ServerSOAP {
 			return null;
 		}
 	}
-	
+
 	@WebMethod
 	public boolean createAlbum (String name){
 		System.out.println(String.format("Creating new album named %s", name));
 		return server.createAlbum(name);
 	}
-	
+
 	@WebMethod
 	public void deleteAlbum (String album){
 		System.out.println(String.format("Deleting %s", album));
@@ -65,7 +68,7 @@ public class ServerSOAP {
 		}catch (IOException e){
 		}
 	}
-	
+
 	@WebMethod
 	public boolean deletePicture (String album, String picture){
 		System.out.println(String.format("Deleting %s of %s",picture, album));
@@ -76,7 +79,7 @@ public class ServerSOAP {
 			return false;
 		}
 	}
-	
+
 	@WebMethod
 	public boolean uploadPicture (String album, String name, byte [] data){
 		System.out.println(String.format("Uploading picture %s (album : %s)", name, album));
@@ -87,14 +90,14 @@ public class ServerSOAP {
 			return false;
 		}
 	}
-	
+
 	public static void main (String [] args) throws IOException {
 		//publish endpoint server
-		
-		String hostname = localhostAddress().toString();
+
+		String hostname = localhostAddress().toString(); //Getting server location (ip address)
 		String address = String.format("http:/%s:%d/ServerSoap",hostname,PORT);
 		System.out.println(address);
-	
+
 		Endpoint.publish(address, new ServerSOAP());
 		System.err.println("FileServer started");
 
@@ -118,19 +121,19 @@ public class ServerSOAP {
 	}
 
 	/**
-	 * Processing client request
+	 * Processing client request. Sends message to client with server location
 	 * @param packet Packet containing the request
 	 * @param socket Muitcast Socket to reply to client
 	 * @throws IOException
 	 */
 	public static void processMessage (DatagramPacket packet, MulticastSocket socket) throws IOException {	
-		// TODO: Security system for UDP messages lost
+
 		if(new String (packet.getData(), 0, packet.getLength()).equals("Album Server") ||
 				new String (packet.getData(), 0, packet.getLength()).equals("SharedGallery Keep Alive")){
-			
+
 			String hostname = localhostAddress().toString();
 			String address = String.format("http:/%s:%d/ServerSoap",hostname,PORT);
-			
+
 			byte[] input = new String (address).getBytes();
 			DatagramPacket reply = new DatagramPacket( input, input.length );
 			reply.setAddress(packet.getAddress());
@@ -138,7 +141,7 @@ public class ServerSOAP {
 			socket.send(reply);
 		}
 	}
-	
+
 	/**
 	 * Return the IPv4 address of the local machine that is not a loopback address if available.
 	 * Otherwise, returns loopback address.
