@@ -25,5 +25,4 @@ import sd.tp1.gui.impl.GalleryWindow;
 		public void start(Stage primaryStage) throws Exception {
 			window.start(primaryStage);
 		}
-	
 }

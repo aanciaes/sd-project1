@@ -25,6 +25,7 @@ import org.glassfish.jersey.client.ClientConfig;
 import sd.tp1.CacheSystem;
 import sd.tp1.gui.GalleryContentProvider;
 import sd.tp1.gui.Gui;
+import sd.tp1.ws.ServerSOAP;
 
 /*
  * This class provides the album/picture content to the gui/main application.
@@ -55,27 +56,8 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		}
 		MulticastSocket socket = new MulticastSocket() ;
 
-		while (true){
-			byte[] input = ("Album Server").getBytes();
-			DatagramPacket packet = new DatagramPacket( input, input.length);
-			packet.setAddress(address);
-			packet.setPort(port);
-			socket.send(packet);
-
-			byte[] buffer = new byte[65536] ;
-			DatagramPacket url_packet = new DatagramPacket( buffer, buffer.length );
-			socket.setSoTimeout(TIMEOUT);
-			while(true){
-				try{
-					socket.receive(url_packet);
-					addServer(url_packet, servers);
-				}catch (SocketTimeoutException e){
-					//No more servers respond to client request
-					break;
-				}
-			}
-			break;
-		}
+		connections(socket, address, port, "Album Server", servers);
+		
 		socket.close(); 
 	}
 
@@ -117,7 +99,17 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 						try {
 							Thread.sleep(5000);
 							cache.updateCache();
-							Map<String, WebTarget> connections = processKeepAlive();
+							Map<String, WebTarget> connections = new HashMap<String, WebTarget>();
+							
+							final int port = 9000 ;
+							final InetAddress address = InetAddress.getByName( "224.0.0.0" ) ;
+							if( ! address.isMulticastAddress()) {
+								System.out.println( "Use range : 224.0.0.0 -- 239.255.255.255");
+							}
+							MulticastSocket socket = new MulticastSocket() ;
+							
+							connections(socket, address, port, "SharedGallery Keep Alive", connections);
+							socket.close(); 
 							for(String key : servers.keySet()){
 								if(!connections.containsKey(key)){
 									servers.remove(key);
@@ -312,17 +304,8 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		return false;
 	}
 
-	public Map<String, WebTarget> processKeepAlive () throws IOException {
-		final int port = 9000 ;
-		final InetAddress address = InetAddress.getByName( "224.0.0.0" ) ;
-		if( ! address.isMulticastAddress()) {
-			System.out.println( "Use range : 224.0.0.0 -- 239.255.255.255");
-		}
-		MulticastSocket socket = new MulticastSocket() ;
-
-		// TODO: Security system for UDP messages lost
-
-		byte[] input = new String("SharedGallery Keep Alive").getBytes();
+	public void connections (MulticastSocket socket, InetAddress address, int port, String message, Map<String, WebTarget> map) throws IOException {
+		byte[] input = (message).getBytes();
 		DatagramPacket packet = new DatagramPacket( input, input.length );
 		packet.setAddress(address);
 		packet.setPort(port);
@@ -331,20 +314,17 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 		byte[] buffer = new byte[65536] ;
 		DatagramPacket url_packet = new DatagramPacket( buffer, buffer.length );
 		socket.setSoTimeout(TIMEOUT);
-		Map<String, WebTarget> connections = new HashMap<String, WebTarget>();
 		while(true){
 			try{
 				socket.receive(url_packet);
-				addServer(url_packet, connections);
+				addServer(url_packet, map);
 			}catch (SocketTimeoutException e){
 				//No more servers respond to client request
 				break;
 			}
 		}
-		socket.close(); 
-		return connections;
 	}
-
+	
 
 	/**
 	 * Represents a shared album.

@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,9 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 	Map<String, WebTarget> serversRest;
 	Map<String, ServerSOAP> serversSoap;
 
+	//cache system
+	CacheSystem cache;
+
 	Gui gui;	
 
 
@@ -52,6 +56,7 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 		count=0;
 		serversRest = new ConcurrentHashMap<String, WebTarget>();
 		serversSoap = new ConcurrentHashMap<String, ServerSOAP> ();
+		cache = new CacheSystem();
 
 		//Creating multicast sockets to discover availables servers
 		final int port = 9000 ;
@@ -61,27 +66,8 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 		}
 		MulticastSocket socket = new MulticastSocket() ;
 
-		while (true){
-			byte[] input = ("Album Server").getBytes();
-			DatagramPacket packet = new DatagramPacket( input, input.length);
-			packet.setAddress(address);
-			packet.setPort(port);
-			socket.send(packet);
+		connections(address, socket, port, serversRest, serversSoap, "Album Server");
 
-			byte[] buffer = new byte[65536] ;
-			DatagramPacket url_packet = new DatagramPacket( buffer, buffer.length );
-			socket.setSoTimeout(TIMEOUT);
-			while(true){
-				try{
-					socket.receive(url_packet);
-					addServer(url_packet, serversRest, serversSoap);
-				}catch (SocketTimeoutException e){
-					//No more servers respond to client request
-					break;
-				}
-			}
-			break;
-		}
 		socket.close(); 
 	}
 
@@ -127,7 +113,53 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 
 	@Override
 	public void register(Gui gui) {
+		if( this.gui == null ) {
+			this.gui = gui;
 
+			Thread keepAlive = new Thread(new Runnable(){
+				public void run(){
+					while(true){
+						try {
+							Thread.sleep(5000);
+							cache.updateCache();
+							
+							Map<String, WebTarget> connections_rest = new HashMap<String, WebTarget>();
+							Map<String, ServerSOAP> connections_soap=new HashMap<String, ServerSOAP>();
+							
+							final int port = 9000 ;
+							final InetAddress address = InetAddress.getByName( "224.0.0.0" ) ;
+							if( ! address.isMulticastAddress()) {
+								System.out.println( "Use range : 224.0.0.0 -- 239.255.255.255");
+							}
+							MulticastSocket socket = new MulticastSocket() ;
+							
+							connections(address, socket, port, connections_rest, connections_soap, "SharedGallery Keep Alive");
+							socket.close(); 
+							
+							for(String key : serversRest.keySet()){
+								if(!connections_rest.containsKey(key)){
+									serversRest.remove(key);
+									System.out.println("Server Down");
+									gui.updateAlbums();
+								}
+							}
+							for(String key : serversSoap.keySet()){
+								if(!connections_soap.containsKey(key)){
+									serversSoap.remove(key);
+									System.out.println("Server Down");
+									gui.updateAlbums();
+								}
+							}
+						} catch (InterruptedException e) {
+							//e.printStackTrace();
+						} catch (IOException e) {
+							//e.printStackTrace();
+						}
+					}
+				}
+			});
+			keepAlive.start();
+		}
 	}
 
 	@Override
@@ -226,11 +258,18 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 
 		String path = String.format("/albuns/%s/%s", album.getName(), picture.getName());
 		while(t.hasNext() || s.hasNext()){
+
+			if(cache.isInCache(picture.getName()))
+				return cache.getData(picture.getName());
+
 			if(t.hasNext()){
 				try{
 					byte [] pictureData = t.next().path(path).request().accept(MediaType.APPLICATION_OCTET_STREAM).get(byte[].class);
-					if(pictureData.length>0)
+					if(pictureData.length>0){
+						cache.addPicture(picture.getName(), pictureData);
 						return pictureData;
+					}
+
 				}
 				catch (javax.ws.rs.NotFoundException e) {
 				}
@@ -240,8 +279,10 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 			if(s.hasNext()){
 				try{
 					byte [] pictureData = s.next().getPictureData(album.getName(), picture.getName());
-					if(pictureData.length>0)
+					if(pictureData.length>0){
+						cache.addPicture(picture.getName(), pictureData);
 						return pictureData;
+					}
 				}
 				catch(NullPointerException e){
 				}
@@ -253,9 +294,9 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 	@Override
 	public Album createAlbum(String name) {
 		System.out.println(String.format("Creating album named %s", name));
-		
+
 		SharedAlbum album = new SharedAlbum(name);
-		
+
 		if(albumExists(getListOfAlbums(), album)){
 			System.out.println("Album already exists. Album not created");
 			return null;
@@ -285,6 +326,7 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 		String path = String.format("/albuns/%s/newPicture/%s/%s", album.getName(), name, aux);
 		if(count++%2==0){
 			if(getServerSoap().uploadPicture(album.getName(), name, data)){
+				cache.addPicture(name, data);
 				return new SharedPicture(name);
 			}
 		}
@@ -330,14 +372,17 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 				if(t.hasNext()){
 					Response response = t.next().path(path).request().delete();
 
-					if(response.getStatus()==ACCEPTED)
+					if(response.getStatus()==ACCEPTED){
+						cache.deletePicture(picture.getName());
 						return true;
+					}
 
 				}
 
 				if(s.hasNext()){
 					try{
 						s.next().deletePicture(album.getName(), picture.getName());
+						cache.deletePicture(picture.getName());
 					}
 					catch (NullPointerException e){
 					}
@@ -350,6 +395,31 @@ public class SharedGalleryContentProviderRESTPLUS implements GalleryContentProvi
 			return false;
 		}
 		return false;
+	}
+
+	public void connections (InetAddress address, MulticastSocket socket, int port, Map<String, WebTarget> map, 
+			Map<String, ServerSOAP> map2, String message) throws IOException {
+		while (true){
+			byte[] input = (message).getBytes();
+			DatagramPacket packet = new DatagramPacket( input, input.length);
+			packet.setAddress(address);
+			packet.setPort(port);
+			socket.send(packet);
+
+			byte[] buffer = new byte[65536] ;
+			DatagramPacket url_packet = new DatagramPacket( buffer, buffer.length );
+			socket.setSoTimeout(TIMEOUT);
+			while(true){
+				try{
+					socket.receive(url_packet);
+					addServer(url_packet, map, map2);
+				}catch (SocketTimeoutException e){
+					//No more servers respond to client request
+					break;
+				}
+			}
+			break;
+		}
 	}
 
 	/**

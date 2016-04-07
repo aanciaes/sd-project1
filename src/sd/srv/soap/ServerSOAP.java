@@ -22,7 +22,7 @@ import sd.srv.BasicServer;
 @WebService
 public class ServerSOAP {
 
-	public static final int PORT = 8080;
+	public static final int PORT = 8081;
 	private static final String DEFAULT_ALBUM_FILESYSTEM = "/home/miguel/AlbumFileSystem";
 
 	//Basic web service performs all operations over Disk (File System)

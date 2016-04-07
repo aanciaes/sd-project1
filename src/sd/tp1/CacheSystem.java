@@ -1,7 +1,7 @@
 package sd.tp1;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -20,8 +20,8 @@ public class CacheSystem {
 	private Map<String, Long> lastAcess;
 
 	public CacheSystem () {
-		pictures=new HashMap<String, byte[]>();
-		lastAcess=new HashMap<String, Long>();
+		pictures=new ConcurrentHashMap<String, byte[]>();
+		lastAcess=new ConcurrentHashMap<String, Long>();
 	}
 
 	/**
