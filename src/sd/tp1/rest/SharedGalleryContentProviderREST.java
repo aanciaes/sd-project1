@@ -21,13 +21,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.message.internal.CacheControlProvider;
 
-import sd.srv.rest.ServerREST;
 import sd.tp1.CacheSystem;
 import sd.tp1.gui.GalleryContentProvider;
 import sd.tp1.gui.Gui;
-import sd.tp1.ws.ServerSOAP;
 
 /*
  * This class provides the album/picture content to the gui/main application.
@@ -218,8 +215,8 @@ public class SharedGalleryContentProviderREST implements GalleryContentProvider{
 			try{
 				byte [] pictureData;
 				if(cache.isInCache(picture.getName())){
-					pictureData=cache.getData(picture.getName());
 					System.out.println("Cache Hit");
+					return cache.getData(picture.getName());
 				}else {
 					pictureData = t.next().path(path).request().accept(MediaType.APPLICATION_OCTET_STREAM).get(byte[].class);
 					if(pictureData.length>0){

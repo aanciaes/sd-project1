@@ -203,18 +203,17 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		Iterator<ServerSOAP> it = servers.values().iterator();
 		while(it.hasNext()){
 			try{
-				byte [] pictureData;
 				if(cache.isInCache(picture.getName())){
 					System.out.println("On cache");
-					pictureData = cache.getData(picture.getName());
+					return cache.getData(picture.getName());
 				}
 				else{
-					pictureData = it.next().getPictureData(album.getName(), picture.getName());
-					if(pictureData!=null)
+					byte [] pictureData = it.next().getPictureData(album.getName(), picture.getName());
+					if(pictureData!=null){
 						cache.addPicture(picture.getName(), pictureData);
+						return pictureData;
+					}
 				}
-				if(pictureData.length>0)
-					return pictureData;
 			}catch(NullPointerException e){
 			}
 		}
